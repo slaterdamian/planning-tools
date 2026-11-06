@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Development Code Intake Assistant · Beaverton Type 1</title>
+<meta name="description" content="A rule-based completeness review for City of Beaverton Type 1 land use applications: zone-aware submittal checklist, applicable Development Code standards, and a draft incompleteness letter.">
+<style>
+:root {
+  --ink: #1d2521; --muted: #5d6762; --line: #d9ddd8; --paper: #fbfaf7; --card: #ffffff;
+  --accent: #2d4a3e; --accent-soft: #e7eee9; --ok: #2f6b3f; --ok-bg: #e8f3ea;
+  --warn: #8a5a00; --warn-bg: #fdf3dc; --bad: #9b2c22; --bad-bg: #fbe9e6; --link: #1f5c8a;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--paper); }
+a { color: var(--link); }
+header.top { background: var(--accent); color: #fff; padding: 28px 20px 24px; }
+header.top .wrap, main, footer { max-width: 980px; margin: 0 auto; }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; opacity: .8; }
+h1 { font-size: 28px; line-height: 1.2; margin: 10px 0 8px; }
+header.top p { margin: 0; max-width: 720px; opacity: .92; }
+.examples { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.examples span { font-size: 14px; opacity: .85; margin-right: 4px; }
+.examples button { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+.examples button:hover { background: rgba(255,255,255,.22); }
+main { padding: 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; margin-bottom: 18px; }
+.card > h2 { display: flex; align-items: baseline; gap: 10px; font-size: 19px; margin: 0 0 4px; }
+.card > h2 .n { font: 600 13px var(--mono); color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 7px; }
+.card > .sub { color: var(--muted); margin: 0 0 16px; font-size: 15px; }
+.types { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.types label { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; cursor: pointer; display: block; }
+.types label:hover { border-color: var(--accent); }
+.types input { position: absolute; opacity: 0; pointer-events: none; }
+.types label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.types label:has(input:focus-visible) { outline: 2px solid var(--link); outline-offset: 2px; }
+.types b { display: block; font-size: 15px; }
+.types small { color: var(--muted); font-size: 13px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 16px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field > span, .q > .ql { font-weight: 600; font-size: 14px; }
+.field small, .q small { color: var(--muted); font-size: 13px; font-weight: 400; }
+input[type=text], input[type=number], select, textarea { font: inherit; font-size: 15px; padding: 8px 10px; border: 1px solid #c4cac5; border-radius: 6px; background: #fff; color: var(--ink); width: 100%; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
+.q { padding: 12px 0; border-top: 1px solid #eef0ed; }
+.q:first-child { border-top: 0; padding-top: 0; }
+.q .opts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; }
+.q .opts.col { flex-direction: column; gap: 6px; }
+.q .opts label { display: flex; gap: 8px; align-items: flex-start; font-size: 15px; cursor: pointer; }
+.q .opts input { margin-top: 4px; accent-color: var(--accent); }
+.q input[type=number], .q input[type=text] { max-width: 280px; margin-top: 6px; }
+.empty { color: var(--muted); font-style: italic; margin: 0; }
+.banner { border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; border: 1px solid; }
+.banner b { display: block; margin-bottom: 2px; }
+.banner.ok { background: var(--ok-bg); border-color: #b9d8bf; }
+.banner.route, .banner.bad { background: var(--bad-bg); border-color: #efc2bb; }
+.banner.warn, .banner.incomplete { background: var(--warn-bg); border-color: #ecd59f; }
+.notes { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 6px; }
+.notes li { padding: 8px 12px; border-radius: 6px; font-size: 15px; border-left: 4px solid; }
+.notes .ok { background: var(--ok-bg); border-color: var(--ok); }
+.notes .warn { background: var(--warn-bg); border-color: #c99a2e; }
+.notes .bad { background: var(--bad-bg); border-color: var(--bad); }
+.notes .info { background: #eef3f8; border-color: var(--link); }
+h3 { font-size: 15px; margin: 18px 0 8px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.items { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 8px; }
+.items li { display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; padding: 12px 14px; border-top: 1px solid #eef0ed; }
+.items li:first-child { border-top: 0; }
+.items .it b { font-size: 15px; }
+.items .it p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.items .cite { font: 13px var(--mono); }
+.seg { display: inline-flex; border: 1px solid #c4cac5; border-radius: 6px; overflow: hidden; align-self: start; }
+.seg button { border: 0; background: #fff; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; color: var(--ink); }
+.seg button + button { border-left: 1px solid #c4cac5; }
+.seg button[aria-pressed=true].r { background: var(--ok); color: #fff; }
+.seg button[aria-pressed=true].m { background: var(--bad); color: #fff; }
+.seg button[aria-pressed=true].d { background: #b57d10; color: #fff; }
+.items .dnote { grid-column: 1 / -1; }
+.guards { margin: 12px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+.guards li::before { content: "✕ "; color: var(--bad); font-weight: 700; }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 16px; flex-wrap: wrap; }
+.tabs button { border: 0; background: none; padding: 8px 12px; font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.tabs button[aria-selected=true] { color: var(--accent); border-color: var(--accent); }
+.tools { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.btn { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 8px 14px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn.ghost { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+.doc { border: 1px solid var(--line); border-radius: 8px; padding: 24px 28px; background: #fff; font-size: 15px; }
+.doc h4 { margin: 18px 0 6px; font-size: 15px; }
+.doc table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.doc th, .doc td { text-align: left; padding: 7px 8px; border-bottom: 1px solid #e6e9e5; vertical-align: top; }
+.doc th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.st { font: 600 12px var(--mono); padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+.st.r { background: var(--ok-bg); color: var(--ok); } .st.m { background: var(--bad-bg); color: var(--bad); }
+.st.d { background: var(--warn-bg); color: var(--warn); } .st.u { background: #eef0ed; color: var(--muted); }
+.ph { background: #fff6cc; padding: 0 3px; border-radius: 3px; }
+.std { margin: 0; padding-left: 20px; } .std li { margin: 3px 0; }
+.std .why { color: var(--muted); }
+.copied { color: var(--ok); font-size: 14px; align-self: center; }
+footer { padding: 4px 20px 40px; color: var(--muted); font-size: 14px; }
+.hidden { display: none !important; }
+@media (max-width: 600px) { .items li { grid-template-columns: 1fr; } .doc { padding: 16px; } h1 { font-size: 23px; } }
+@media print {
+  header.top, footer, #c1, #c2, #c3, .tabs, .tools { display: none !important; }
+  body, main { background: #fff; padding: 0; } .card { border: 0; padding: 0; } .doc { border: 0; padding: 0; }
+  .ph { background: none; } a { color: inherit; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Beaverton Development Code · Type 1 intake</div>
+    <h1>Development Code Intake Assistant</h1>
+    <p>Pick the application type and zone, answer a few project facts, and mark what the applicant submitted. You get the zone-specific completeness checklist, the code standards that apply, and a draft incompleteness letter. Every citation links to the city's online code.</p>
+    <div class="examples" aria-label="Load an example">
+      <span>Try an example:</span>
+      <button type="button" data-ex="sign">3 wall signs (CS)</button>
+      <button type="button" data-ex="drcl">Retail addition (GC)</button>
+      <button type="button" data-ex="sdmh">New windows (RMA)</button>
+      <button type="button" data-ex="tree">Landscape tree (CS)</button>
+      <button type="button" data-ex="route">Too big for Type 1</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="c1">
+    <h2><span class="n">1</span> Application and site</h2>
+    <p class="sub">The zone matters: sign and design standards change sharply from one zone to the next.</p>
+    <div class="types" id="types" role="radiogroup" aria-label="Application type"></div>
+    <div class="grid">
+      <label class="field"><span>Zoning district</span><select id="zone"></select></label>
+      <label class="field"><span>Site address <small>(optional, for the letter)</small></span><input type="text" id="site" placeholder="e.g. 1234 SW Example Ave"></label>
+      <label class="field"><span>Applicant <small>(optional)</small></span><input type="text" id="applicant" placeholder="e.g. Sample Signs LLC"></label>
+      <label class="field"><span>Case number <small>(optional)</small></span><input type="text" id="caseNo" placeholder="e.g. SP2026-0000"></label>
+    </div>
+  </section>
+
+  <section class="card" id="c2">
+    <h2><span class="n">2</span> Threshold and project facts</h2>
+    <p class="sub" id="c2sub">Choose an application type to see its questions.</p>
+    <div id="facts"></div>
+  </section>
+
+  <section class="card" id="c3">
+    <h2><span class="n">3</span> Scope and submittal checklist</h2>
+    <p class="sub">Mark each required item as received, missing or deficient. Completeness is about missing information only, never quality or the likely outcome (<span data-cite="50.25.3"></span>).</p>
+    <div id="scope"></div>
+  </section>
+
+  <section class="card" id="c4">
+    <h2><span class="n">4</span> Outputs</h2>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="t-check" aria-selected="true">Internal checklist</button>
+      <button type="button" role="tab" id="t-letter" aria-selected="false">Draft letter</button>
+    </div>
+    <div class="tools">
+      <button type="button" class="btn" id="copy">Copy</button>
+      <button type="button" class="btn ghost" id="print">Print</button>
+      <span class="copied hidden" id="copied" role="status">Copied</span>
+    </div>
+    <div class="doc" id="out" tabindex="-1"></div>
+  </section>
+</main>
+
+<footer>
+  Personal prototype, not an official City of Beaverton tool, and not legal or permitting advice. The rules are drawn from the
+  Beaverton Development Code (Chapters 20–70, current through ORD 4879, April 2026) and the city's application forms; always confirm
+  against the <a href="https://online.encodeplus.com/regs/beaverton-or/doc-viewer.aspx" target="_blank" rel="noopener">current code</a>.
+  Code links open the nearest section that encodePlus indexes. Fees are assumed to be collected before review, so they're never listed as missing.
+  · <a href="https://github.com/slaterdamian/planning-tools/tree/main/permit-intake-assistant">Source and AI version</a>
+</footer>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- Code links ---------- */
+const BASE = 'https://online.encodeplus.com/regs/beaverton-or/doc-viewer.aspx#secid-';
+const SECID = {"20.05":121,"20.05.15":129,"20.10":137,"20.10.15":465,"20.15":142,"20.15.15":257,"20.20":440,"20.20.15":504,"20.25.10":1002,
+ "40.20":213,"40.20.15":216,"40.21":3551,"40.21.15":3554,"40.47":957,"40.47.15":1030,"40.60":527,"40.60.15":530,"40.90":391,"40.90.10":399,"40.90.15":400,
+ "50.25":438,"50.35":470,"60.05":848,"60.05.15":851,"60.05.20":852,"60.05.25":853,"60.15":746,"60.30.10":163,"60.30.15":164,"60.37":3604,
+ "60.40.25":283,"60.40.30":284,"60.40.35":290,"60.40.40":291,"60.40.50":1098,"60.50.05":151,"60.55":603,"60.60":557,"60.60.25":404,"70.15":3444};
+const DEFS = {"Wall Sign":502,"Freestanding Sign":486,"Primary Building Wall":1089,"Floor Area":45,"Landscape Tree":675,"Hazardous Tree":866,
+ "Protected Tree":873,"Lot of Record":61,"Middle Housing":3540,"Diameter at Breast Height (DBH)":666,"Electronic Message Center (EMC)":1080,"Sign":86};
+const EDM = 'https://beavertonoregon.gov/814/Engineering-Design-Manual-Standard-Drawi';
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function secUrl(sec) {
+  const p = sec.split('.');
+  for (let i = p.length; i >= 2; i--) { const k = p.slice(0, i).join('.'); if (SECID[k]) return BASE + SECID[k]; }
+  return null;
+}
+function cite(sec, label) {
+  const u = secUrl(sec), t = esc(label || 'BDC ' + sec);
+  return u ? `<a href="${u}" target="_blank" rel="noopener">${t}</a>` : t;
+}
+/* rich(): {60.40.35.1.A} or {60.40.35|label} → code link; [[Term]] or [[Term|text]] → definition link; **b** → bold */
+function rich(s) {
+  return esc(s)
+    .replace(/\{([0-9][0-9A-Za-z.]*)(?:\|([^}]*))?\}/g, (_, sec, lab) => cite(sec, lab))
+    .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, term, text) => DEFS[term] ? `<a href="${BASE + DEFS[term]}" target="_blank" rel="noopener">${text || term}</a>` : (text || term))
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/\(EDM\)/g, `(<a href="${EDM}" target="_blank" rel="noopener">Engineering Design Manual</a>)`);
+}
+const plain = html => { const d = document.createElement('div'); d.innerHTML = html; return d.textContent; };
+
+/* ---------- Zones ---------- */
+const ZONES = [
+  ['Residential', [['MR','Multi-Unit Residential','res'],['RMA','Residential Mixed A','rm'],['RMB','Residential Mixed B','rm'],['RMC','Residential Mixed C','rm']]],
+  ['Commercial', [['NS','Neighborhood Service','com'],['CS','Community Service','com'],['CC','Corridor Commercial','com'],['GC','General Commercial','com']]],
+  ['Employment / Industrial', [['OI','Office Industrial','ind'],['OI-NC','Office Industrial – Nike Campus','ind'],['IND','Industrial','ind']]],
+  ['Multiple Use', [['RC-E','Downtown Regional Center – East','mu'],['OI-WS','Washington Square Office Industrial','mu'],['C-WS','Washington Square Commercial','mu'],
+    ['TC-MU','Town Center Multiple Use','mu'],['TC-HDR','Town Center High Density Residential','mu'],['SC-MU','Station Community Multiple Use','mu'],
+    ['SC-HDR','Station Community High Density Residential','mu'],['SC-S','Station Community Sunset','mu'],['SC-E1','Station Community Employment 1','mu'],
+    ['SC-E2','Station Community Employment 2','mu'],['SC-E3','Station Community Employment 3','mu']]],
+  ['Downtown Design District (Ch. 70)', [['RC-BC','Regional Center – Beaverton Central','dt'],['RC-MU','Regional Center – Mixed Use','dt'],
+    ['RC-DT','Regional Center – Downtown Transition','dt'],['RC-OT','Regional Center – Old Town','dt']]],
+  ['Cooper Mountain', [['CM-CS','Cooper Mountain – Community Service','cmcom'],['CM-HDR','Cooper Mountain – High Density Residential','cmmu'],
+    ['CM-MR','Cooper Mountain – Multi-Unit Residential','cmres'],['CM-RM','Cooper Mountain – Residential Mixed','cmrm']]]
+];
+const ZINFO = {}; ZONES.forEach(([g, zs]) => zs.forEach(([c, n, k]) => ZINFO[c] = { code: c, name: n, kind: k, group: g }));
+const zk = z => (ZINFO[z] || {}).kind;
+const signResidential = z => ['MR','RMA','RMB','RMC','CM-MR','CM-RM'].includes(z);
+const sdmhZone = z => ['RMA','RMB','RMC','CM-RM'].includes(z);
+const isDowntown = z => zk(z) === 'dt';
+const isIndustrial = z => zk(z) === 'ind';
+const isResZone = z => ['res','rm','cmres','cmrm'].includes(zk(z));
+function siteDev(z) {
+  const k = zk(z);
+  if (k === 'res' || k === 'rm') return '20.05.15';
+  if (k === 'com') return '20.10.15';
+  if (k === 'ind') return '20.15.15';
+  if (k === 'mu') return '20.20.15';
+  if (k === 'dt') return '70.15';
+  return '20.22.15';
+}
+const FS_HEIGHT = { NS: 8, CS: 15, 'CM-CS': 15, CC: 8, GC: 15, IND: 8, 'OI-NC': 8, OI: 8 };
+const fsHeight = z => FS_HEIGHT[z] || 15;
+
+/* ---------- Helpers for application modules ---------- */
+const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(/,/g, '')); return isFinite(n) ? n : null; };
+const fmt = n => Math.round(n * 10) / 10 === Math.round(n) ? Math.round(n).toLocaleString() : (Math.round(n * 10) / 10).toLocaleString();
+const has = (arr, v) => Array.isArray(arr) && arr.includes(v);
+const NO_FEES = 'Fees: assumed to be collected before review, so never listed as missing.';
+const TREE_GUARDS = ['An arborist letter: that is only for a [[Hazardous Tree]] removal, not a [[Landscape Tree]].',
+  'Fee-in-lieu: that applies to certain [[Protected Tree]] removals, not Landscape Trees. Use the replacement rule in {60.60.25.9}.'];
+
+/* ---------- Application modules ---------- */
+const TYPES = {
+/* ===== Sign permit ===== */
+sign: {
+  name: 'Sign Permit', short: 'Sign Permit', code: '40.60.15.1', blurb: 'Wall, freestanding, awning, projecting and blade signs',
+  facts: [
+    { k: 'wall', t: 'num', l: 'Number of new or changed wall signs', d: 0 },
+    { k: 'areas', t: 'text', l: 'Area of each new wall sign (sq ft)', h: 'Separate with commas, e.g. 48, 36, 24', show: f => num(f.wall) > 0 },
+    { k: 'len', t: 'num', l: 'Primary Building Wall length (ft)', h: 'The street-facing wall used for the 20% calculation.', show: (f, z) => num(f.wall) > 0 && !signResidential(z) },
+    { k: 'ht', t: 'num', l: 'Primary Building Wall height (ft)', h: 'Only the first 25 ft counts.', show: (f, z) => num(f.wall) > 0 && !signResidential(z) },
+    { k: 'exist', t: 'num', l: 'Existing wall, awning and blade sign area that stays (sq ft)', h: 'Existing signs count toward the allowance (60.40.30.1).', d: 0, show: (f, z) => num(f.wall) > 0 && !signResidential(z) },
+    { k: 'fs', t: 'num', l: 'Number of new freestanding signs', d: 0 },
+    { k: 'fsh', t: 'num', l: 'Height of the tallest new freestanding sign (ft)', show: (f, z) => num(f.fs) > 0 && !signResidential(z) },
+    { k: 'other', t: 'checks', l: 'Other sign types in this application', o: [['awning','Awning sign'],['proj','Projecting sign'],['blade','Blade sign'],['emc','Electronic message center (EMC)']] },
+    { k: 'illum', t: 'yesno', l: 'Are any of the signs illuminated?', d: 'no' },
+    { k: 'multi', t: 'yesno', l: 'Is it a multi-tenant building?', d: 'no', show: (f, z) => !signResidential(z) },
+    { k: 'inv', t: 'yesno', l: 'Is a sign inventory for the building already on file with the City?', d: 'no' }
+  ],
+  evaluate(f, z) {
+    const r = { notes: [], standards: [], items: [], guards: [] };
+    const wall = num(f.wall) || 0, fs = num(f.fs) || 0, other = f.other || [], res = signResidential(z);
+    if (!wall && !fs && !other.length) { r.scope = { k: 'incomplete', t: 'Add at least one sign', x: 'Enter the number of wall or freestanding signs, or pick another sign type.' }; return r; }
+    r.scope = { k: 'ok', t: 'Type 1 Sign Permit', x: `Any new, changed or relocated [[Sign|sign]] needs a Sign permit ({40.60.15.1.A}). The Director decides it under the Type 1 procedure ({50.35}).` };
+    if (res) r.notes.push({ k: 'info', x: `${z} is a residential zone, so the sign standards are in {60.40.40}, not the commercial 20% wall calculation in {60.40.35}.` });
+    if (isDowntown(z)) r.notes.push({ k: 'info', x: `${z} is in the Downtown Design District: the downtown design and material standards in {60.40.35.6} apply on top of the base sign rules.` });
+    /* Wall sign math (preliminary review, not completeness) */
+    if (wall && !res) {
+      const areas = String(f.areas || '').split(/[,;\s]+/).map(num).filter(n => n != null);
+      const len = num(f.len), ht = num(f.ht), exist = num(f.exist) || 0;
+      if (areas.length && areas.length !== wall) r.notes.push({ k: 'warn', x: `You entered ${areas.length} sign area${areas.length === 1 ? '' : 's'} for ${wall} wall sign${wall === 1 ? '' : 's'}.` });
+      areas.forEach((a, i) => { if (a > 120) r.notes.push({ k: 'bad', x: `Wall sign ${i + 1} is ${fmt(a)} sq ft. No single wall sign may exceed 120 sq ft ({60.40.35.1.A}).` }); });
+      if (len && ht) {
+        const h = Math.min(ht, 25), allow = len * h * 0.2, proposed = areas.reduce((s, a) => s + a, 0), total = proposed + exist;
+        r.notes.push({ k: total > allow ? 'bad' : 'ok', x: `Wall-sign allowance: ${fmt(len)} ft × ${fmt(h)} ft${ht > 25 ? ' (capped at 25)' : ''} × 20% = **${fmt(allow)} sq ft** ({60.40.35.1.A}). Proposed ${fmt(proposed)} + existing ${fmt(exist)} = **${fmt(total)} sq ft**, ${total > allow ? fmt(total - allow) + ' sq ft over the allowance.' : fmt(allow - total) + ' sq ft under the allowance.'}` });
+        r.notes.push({ k: 'info', x: 'The allowance is a building-wide total. It can be spread across other walls in any proportion ({60.40.35.1.B}).' });
+      }
+    }
+    if (fs && !res) {
+      const max = fsHeight(z), fsh = num(f.fsh);
+      r.notes.push({ k: fs > 1 ? 'warn' : 'info', x: `Freestanding signs in ${z}: one per legal lot, up to 64 sq ft for all faces combined and 32 sq ft per face, ${max} ft tall at most ({60.40.35.5}).${fs > 1 ? ' More than one needs over 300 ft of street frontage, with 200 ft between signs ({60.40.35.5.I}).' : ''}` });
+      if (fsh != null && fsh > max) r.notes.push({ k: 'bad', x: `The tallest freestanding sign is ${fmt(fsh)} ft. The limit in ${z} is ${max} ft.` });
+    }
+    if (has(other, 'blade')) r.notes.push({ k: f.illum === 'yes' ? 'warn' : 'info', x: `Blade signs: 9 sq ft max, one per tenant space, counted in the wall-sign total, and never internally illuminated ({60.40.35.4}).` });
+    if (has(other, 'awning')) r.notes.push({ k: 'info', x: 'Awning signs count toward the wall-sign total and need 8 ft of clearance underneath ({60.40.35.2}).' });
+    if (has(other, 'proj')) r.notes.push({ k: 'info', x: 'A projecting sign is allowed instead of a freestanding sign: 32 sq ft per face, 64 sq ft total, 8 ft of clearance ({60.40.35.3}).' });
+    /* Items */
+    const it = r.items;
+    it.push({ id: 'form', l: 'Signed application form', c: '50.25.1.A', d: 'Signed by the property owner or manager, or by the tenant or sign company with the owner\'s written consent ({40.60.15.1.D}).' });
+    it.push({ id: 'stmt', l: 'Written statement addressing the approval criteria', c: '50.25.1.B', d: 'How each sign meets {40.60.15.1.C}, including conformance with 60.40.' });
+    if (f.inv !== 'yes') it.push({ id: 'inv', l: 'Sign inventory', c: '60.40.30.1', d: 'Every existing wall, blade and awning sign on the building. Existing signs count toward the allowance.' });
+    it.push({ id: 'rend', l: 'Close-up rendering of each sign', c: '40.60.15.1.D', d: 'Length and height of the sign and its letters' + (f.illum === 'yes' ? '; illumination method' : '') + (has(other, 'emc') ? '; EMC share of the sign face and its brightness and display duration ({60.40.50})' : '') + '.' });
+    it.push({ id: 'site', l: 'Site plan (a clear aerial photo is acceptable)', c: '40.60.15.1.D', d: 'Whole lot: each sign\'s location, property lines, rights-of-way, driveways, parking and landscaping, and existing freestanding or projecting signs' + (fs ? '; **Sight Clearance Areas** for the freestanding sign ({40.60.15.1.C.5}, (EDM))' : '') + '.' });
+    if (wall || has(other, 'awning') || has(other, 'blade')) it.push({ id: 'elev', l: 'Wall elevations', c: '60.40.35.1.C', d: 'Each proposed sign drawn on its wall, with its height on the wall dimensioned.' });
+    if (wall && !res) it.push({ id: 'pbw', l: '[[Primary Building Wall]] calculation', c: '60.40.35.1.A', d: 'Wall face used (N/S/E/W), wall height (25 ft max), wall length, wall area, and the 20% allowance.' });
+    if (f.multi === 'yes' && !res) it.push({ id: 'multi', l: 'Tenant allocation of the wall-sign area', c: '60.40.35.1.B', d: 'Split by lease frontage, or under the owner\'s master sign program ({60.40.35.1.E}).' });
+    if (isDowntown(z)) it.push({ id: 'dtmat', l: 'Sign materials and colors', c: '60.40.35.6', d: 'Needed to check the downtown design and material standards.' });
+    /* Standards */
+    const st = r.standards;
+    st.push(['40.60.15.1.C', 'Sign approval criteria']);
+    st.push(['60.40.25', 'Prohibited signs']);
+    st.push(['60.40.30', 'How sign size and height are measured; existing signs count']);
+    if (res) st.push(['60.40.40', `Signs in residential zones (${z})`]);
+    else {
+      if (wall) st.push(['60.40.35.1', 'Wall signs: 20% allowance, 120 sq ft max each, 16 in. max projection']);
+      if (has(other, 'awning')) st.push(['60.40.35.2', 'Awning signs']);
+      if (has(other, 'proj')) st.push(['60.40.35.3', 'Projecting signs']);
+      if (has(other, 'blade')) st.push(['60.40.35.4', 'Blade signs']);
+      if (fs) st.push(['60.40.35.5', `Freestanding signs (Table 60.40.35.${zk(z) === 'mu' || zk(z) === 'dt' || z === 'CM-HDR' ? 'B' : 'A'})`]);
+      if (isDowntown(z)) st.push(['60.40.35.6', 'Downtown Regional Center design and material standards']);
+    }
+    if (has(other, 'emc')) st.push(['60.40.50', 'Electronic message centers']);
+    if (fs) st.push(['EDM', 'Vision clearance standards in the Engineering Design Manual ({40.60.15.1.C.5})']);
+    r.guards.push('An engineer\'s or structural stamp: that is Building Division routing, not a planning completeness item.');
+    r.guards.push('Design Review: signs never need it.');
+    r.guards.push(NO_FEES);
+    return r;
+  }
+},
+
+/* ===== DRCL ===== */
+drcl: {
+  name: 'Design Review Compliance Letter', short: 'DRCL', code: '40.20.15.1', blurb: 'Minor changes and small additions to commercial, industrial and mixed-use sites',
+  facts: [
+    { k: 'bldg', t: 'radio', l: 'What is on the site?', o: [['nonres','Commercial, industrial, multiple-use or other non-residential building'],['housing','Single-detached dwelling or middle housing']], d: 'nonres' },
+    { k: 'acts', t: 'checks', col: true, l: 'Proposed actions (40.20.15.1.A.1)', o: [
+      ['a','Façade changes (not just color)'],['b','Add, remove or move windows'],['c','Add, remove or move person or loading doors'],
+      ['d','New or changed awnings, canopies or other mounted structures'],['e','Change up to 15% of on-site landscaping, with no reduction in required landscaping'],
+      ['f','Change parking or maneuvering areas without adding paved area'],['g','New or changed fences or retaining walls'],['h','Change the existing grade'],
+      ['i','Remove Landscape Trees'],['j','Add natural-material landscape features (25% max)'],['k','Add or change on-site lighting'],
+      ['l','Accessory structure or non-habitable building up to 1,000 sq ft footprint'],['m','New or expanded Community Garden']] },
+    { k: 'acc', t: 'num', l: 'Accessory structure footprint (sq ft)', show: f => has(f.acts, 'l') },
+    { k: 'gfa', t: 'yesno', l: 'Does the proposal add floor area to a building?', d: 'no' },
+    { k: 'exGfa', t: 'num', l: 'Existing building gross floor area (sq ft)', show: f => f.gfa === 'yes' },
+    { k: 'addGfa', t: 'num', l: 'Proposed addition (gross sq ft)', show: f => f.gfa === 'yes' },
+    { k: 'flags', t: 'checks', col: true, l: 'Other worksheet items', o: [['roof','New rooftop mechanical equipment'],['load','Loading, solid waste or mechanical areas'],['ldhp','Reduces dwelling units or affects visitability under an approved Land Division Housing Plan']] },
+    { k: 'beyond', t: 'yesno', l: 'Does it include anything beyond these, such as a new building?', d: 'no' }
+  ],
+  evaluate(f, z) {
+    const r = { notes: [], standards: [], items: [], guards: [] };
+    const a = f.acts || [], fl = f.flags || [], ind = isIndustrial(z);
+    if (f.bldg === 'housing') { r.scope = { k: 'route', t: 'Use SDMHDR One instead', x: 'Single-detached dwellings and middle housing go through Single-Detached and Middle Housing Design Review ({40.21.15}), not DRCL. Switch the application type above.' }; return r; }
+    if (f.beyond === 'yes') { r.scope = { k: 'route', t: 'Not Type 1: route to Design Review Two or Three', x: 'DRCL only covers proposals limited to the actions in {40.20.15.1.A}. Anything more, such as a new building, is Design Review Two (Type 2) or Three (Type 3) under {40.20.15}.' }; return r; }
+    const gfa = f.gfa === 'yes';
+    if (!a.length && !gfa) { r.scope = { k: 'incomplete', t: 'Pick at least one proposed action', x: 'Check the actions that describe the proposal, or say whether it adds floor area.' }; return r; }
+    if (has(a, 'l')) {
+      const acc = num(f.acc);
+      if (acc != null && acc > 1000) { r.scope = { k: 'route', t: 'Not Type 1: accessory structure is over 1,000 sq ft', x: `A ${fmt(acc)} sq ft footprint is over the 1,000 sq ft DRCL limit ({40.20.15.1.A.1}). Route to Design Review Two or Three.` }; return r; }
+      if (isResZone(z)) r.notes.push({ k: 'warn', x: `The accessory-structure action (A.1.l) covers Commercial, Industrial and Multiple Use zones, or approved Conditional Uses in any zone. ${z} is residential, so confirm there is an approved Conditional Use.` });
+    }
+    if (gfa) {
+      const ex = num(f.exGfa), add = num(f.addGfa);
+      if (ex == null || add == null) { r.scope = { k: 'incomplete', t: 'Enter the floor-area figures', x: 'The existing and proposed gross floor area decide whether the addition fits DRCL.' }; return r; }
+      const pct = ex > 0 ? add / ex * 100 : Infinity, lim = ind ? 15 : 25;
+      const ok = ind ? (pct <= 15 && add < 30000) : (pct <= 25 && add <= 2500);
+      const rule = ind ? '15% of existing [[Floor Area|floor area]] and under 30,000 sq ft ({40.20.15.1.A.3})' : '25% of existing [[Floor Area|floor area]] and no more than 2,500 sq ft ({40.20.15.1.A.2})';
+      if (!ok) { r.scope = { k: 'route', t: 'Not Type 1: the addition is too large for DRCL', x: `The addition is ${fmt(add)} sq ft, ${fmt(pct)}% of the existing ${fmt(ex)} sq ft. In ${z} the DRCL limit is ${rule}. Route to Design Review Two or Three.` }; return r; }
+      r.notes.push({ k: 'ok', x: `Addition is ${fmt(add)} sq ft, ${fmt(pct)}% of existing. That is within the ${z} limit of ${rule}.` });
+    }
+    r.scope = { k: 'ok', t: 'Type 1 Design Review Compliance Letter', x: 'The proposal is limited to DRCL actions ({40.20.15.1.A}). The Director decides it under the Type 1 procedure ({50.35}).' };
+    if (has(a, 'm')) r.notes.push({ k: 'info', x: 'Community Gardens must meet {60.05.25|60.05.25.15} and are exempt from approval criteria 4–7 ({40.20.15.1.C.9}).' });
+    if (gfa) r.notes.push({ k: 'info', x: 'Because this is an addition, criterion 5 (the design standards in 60.05.15–60.05.30) does not apply to it ({40.20.15.1.C.5}). Chapter 60 as a whole still does (criterion 6).' });
+    /* Items */
+    const it = r.items, ext = ['a','b','c','d','l'].some(x => has(a, x)) || gfa || has(fl, 'roof');
+    it.push({ id: 'form', l: 'Application form, Design Review Project Information and checklist, signed', c: '50.25.1.A', d: 'Signed by the owner, or by an agent with the owner\'s written authorization.' });
+    it.push({ id: 'stmt', l: 'Written statement', c: '50.25.1.B', d: 'Project description (site, structures, landscaping, parking, use; locations, materials, sizes, colors, square footage) and how it meets each criterion in {40.20.15.1.C}' + (has(a, 'i') ? ', including Landscape Tree replacement under {60.60.25.9}' : '') + '.' });
+    if (gfa) it.push({ id: 'gfa', l: 'Existing and proposed gross floor area', c: ind ? '40.20.15.1.A.3' : '40.20.15.1.A.2', d: 'Needed to confirm the addition fits the DRCL threshold.' });
+    it.push({ id: 'site', l: 'Site plan of the entire property', c: '50.25.1', d: 'Abutting streets, property lines, setbacks, structures, parking, driveways, landscaped areas, proposed square footage, easements and utilities within 25 ft of the work, and vehicle, pedestrian and bicycle connections' + (has(a, 'f') ? '; parking-count reconciliation' : '') + '.' });
+    if (ext) it.push({ id: 'elev', l: 'Architectural elevations', c: '40.20.15.1.C', d: 'Character, dimensions, materials, colors and textures of the affected buildings or structures.' });
+    if (has(a, 'e') || has(a, 'j') || has(a, 'i')) it.push({ id: 'land', l: 'Landscape plan', c: '60.05.25', d: (has(a, 'i') ? 'Trees to be removed, their DBH, and replacement trees with species and caliper. ' : '') + 'Show that required landscaping is not reduced.' });
+    if (has(a, 'h')) it.push({ id: 'grade', l: 'Grading plan', c: '60.15.10', d: 'Existing and proposed grades.' });
+    if (has(a, 'k')) it.push({ id: 'light', l: 'Lighting plan', c: '60.05.30', d: 'Fixture types and locations, checked against Table 60.05-1.' });
+    if (gfa || has(a, 'h') || has(a, 'l')) it.push({ id: 'cws', l: 'Clean Water Services documentation', c: '50.25.1.F', d: 'Needed for building additions, new construction, grading or paving. A City pre-screen at a pre-application conference can satisfy it.' });
+    if (has(fl, 'ldhp')) it.push({ id: 'ldhp', l: 'Approved Land Division Housing Plan, or a concurrent amendment', c: '40.20.15.1.C.10', d: 'Because the change reduces dwelling units or affects visitability.' });
+    /* Standards */
+    const st = r.standards;
+    st.push(['40.20.15.1.C', 'DRCL approval criteria']);
+    st.push([siteDev(z), `Site development standards for ${z} (criterion 4)`]);
+    if (!gfa && ['a','b','c','d','e','f','g','j','k','l'].some(x => has(a, x))) st.push(['60.05.15', 'Design standards in 60.05.15–60.05.30 (criterion 5)']);
+    if (['a','b','c','d'].some(x => has(a, x))) st.push(['60.05.15', 'Building design and orientation (façades, windows, entrances)']);
+    if (has(fl, 'roof')) st.push(['60.05.15.5', 'Roof-mounted equipment screening']);
+    if (has(fl, 'load')) st.push(['60.05.20.2', 'Loading areas, solid waste facilities and similar improvements']);
+    if (has(a, 'f')) { st.push(['60.05.20', 'Circulation and parking design']); st.push(['60.30.10', 'Number of parking spaces']); st.push(['60.30.15', 'Off-street parking lot design']); }
+    if (has(a, 'e') || has(a, 'j')) st.push(['60.05.25', 'Landscape, open space and natural areas']);
+    if (has(a, 'g')) st.push(['60.05.25.8', 'Retaining walls (60.05.25.8) and fences and walls (60.05.25.9)']);
+    if (has(a, 'h')) st.push(['60.15.10', 'Grading standards (criterion 7)']);
+    if (has(a, 'i')) st.push(['60.60.25.9', 'Landscape Tree replacement']);
+    if (has(a, 'k')) st.push(['60.05.30', 'Lighting design standards and Table 60.05-1']);
+    if (has(a, 'm')) st.push(['60.05.25', 'Community Gardens (60.05.25.15, per criterion 9)']);
+    r.guards.push('A "500 sq ft" floor-area threshold: there isn\'t one. The limit is 25% and 2,500 sq ft (15% and under 30,000 sq ft in industrial zones).');
+    r.guards.push('Visibility from the public right-of-way: not a commercial Design Review factor.');
+    if (has(a, 'i')) TREE_GUARDS.forEach(g => r.guards.push(g));
+    r.guards.push(NO_FEES);
+    return r;
+  }
+},
+
+/* ===== SDMHDR One ===== */
+sdmh: {
+  name: 'Single-Detached & Middle Housing Design Review One', short: 'SDMHDR One', code: '40.21.15.1', blurb: 'Houses and middle housing in RMA, RMB, RMC and CM-RM',
+  facts: [
+    { k: 'ht', t: 'radio', col: true, l: 'Housing type', o: [['sd','Single-detached dwelling'],['dtq','Duplex, triplex or quadplex'],['th','Townhouse'],['cc','Cottage cluster'],['m56','Five- or six-unit multi-dwelling (CM-RM only)'],['ssc','Small-scale commercial use (CM-RM only)']], d: 'sd' },
+    { k: 'th', t: 'checks', col: true, l: 'Which thresholds describe the proposal? (40.21.15.1.A)', o: [
+      ['1','Add, remove or move windows regulated by 60.05.60 or 60.05.65'],['2','Add, remove or move doors regulated by 60.05.60 or 60.05.65'],['3','Remove Landscape Trees'],
+      ['4','New single-detached dwelling or middle housing (RMA, RMB, RMC, CM-RM)'],['5','Floor-area addition (RMA, RMB, RMC, CM-RM)'],
+      ['6','Widen a garage, parking or maneuvering area next to the street'],['7','Build a detached garage'],['8','Add carports to a cottage cluster'],
+      ['9','New or expanded small-scale commercial use (CM-RM)'],['10','New or expanded five- or six-unit multi-dwelling (CM-RM)']] },
+    { k: 'std', t: 'yesno', l: 'Does the proposal meet every applicable design standard, without using a guideline alternative?', d: 'yes' },
+    { k: 'grade', t: 'yesno', l: 'Any grading within 25 ft of a property line?', d: 'no' },
+    { k: 'light', t: 'yesno', l: 'New parking-lot lighting?', d: 'no' },
+    { k: 'ldhp', t: 'yesno', l: 'Does it reduce dwelling units or affect visitability under an approved Land Division Housing Plan?', d: 'no' }
+  ],
+  evaluate(f, z) {
+    const r = { notes: [], standards: [], items: [], guards: [] };
+    const t = f.th || [], T = n => has(t, String(n));
+    if (!t.length) { r.scope = { k: 'incomplete', t: 'Pick at least one threshold', x: 'If none apply, no SDMHDR application is needed. Window and door changes not regulated by 60.05.60 or 60.05.65 are exempt ({40.21.15.1.A}).' }; return r; }
+    const bad = [];
+    if ((T(4) || T(5)) && !sdmhZone(z)) bad.push(`New construction and floor-area additions only trigger SDMHDR One in RMA, RMB, RMC and CM-RM, and the site is ${z}`);
+    if ((T(9) || T(10) || f.ht === 'm56' || f.ht === 'ssc') && z !== 'CM-RM') bad.push(`five- and six-unit buildings and small-scale commercial uses are CM-RM only, and the site is ${z}`);
+    if (bad.length) { r.scope = { k: 'route', t: 'This threshold does not apply in this zone', x: bad.join('; ') + '. Check the zone, or the commercial DRCL or Design Review path ({40.20.15}).' }; return r; }
+    if (f.std === 'no') { r.scope = { k: 'route', t: 'Not Type 1: route to SDMHDR Two or Three', x: 'Choosing a guideline instead of a standard makes the application Type 2 or Type 3 ({40.21.15}).' }; return r; }
+    r.scope = { k: 'ok', t: 'Type 1 SDMHDR One', x: 'The proposal meets a SDMHDR One threshold ({40.21.15.1.A}). The Director decides it under the Type 1 procedure ({50.35}).' };
+    if (!sdmhZone(z)) r.notes.push({ k: 'warn', x: `The 60.05.60 design standards apply in RMA, RMB, RMC and CM-RM ({60.05.60|60.05.60.1.A}). ${z} is not one of them, so confirm this is the right path.` });
+    const table = { sd: ['60.05.60.2', 'Table 60.05.60.2: single-detached, duplexes, triplexes and quadplexes'], dtq: ['60.05.60.2', 'Table 60.05.60.2: single-detached, duplexes, triplexes and quadplexes'],
+      th: ['60.05.60.3', 'Table 60.05.60.3: townhouses'], cc: ['60.05.60.4', 'Table 60.05.60.4: cottage clusters'], m56: ['60.05.65', '60.05.65: five- and six-unit multi-dwellings in CM-RM'],
+      ssc: ['60.05.60.2', 'Table 60.05.60.2 (or 60.05.60.3 next to a townhouse): small-scale commercial in CM-RM'] }[f.ht || 'sd'];
+    if ((T(1) || T(2)) && table[0] === '60.05.60.2') r.notes.push({ k: 'info', x: 'For the window and door standards, the Design Review Helper walks through Table 60.05.60.2 question by question.', link: '../design-review-helper/' });
+    if (T(5)) r.notes.push({ k: 'info', x: 'For an addition, only the part of the building or site being improved has to meet the design standards ({40.21.15.1.C.7}).' });
+    /* Items */
+    const it = r.items, newc = T(4) || T(9) || T(10), bld = newc || T(5) || T(7);
+    it.push({ id: 'form', l: 'Application form and checklist, signed', c: '50.25.1.A', d: 'Signed by the owner, or by an agent with the owner\'s written authorization.' });
+    it.push({ id: 'stmt', l: 'Written statement', c: '50.25.1.B', d: 'Addresses each applicable Chapter 20 and Chapter 60 provision and each criterion in {40.21.15.1.C}, one at a time. "Not applicable" or boilerplate answers aren\'t enough.' });
+    if (newc || T(5) || T(6) || T(7) || T(8)) it.push({ id: 'exist', l: 'Existing conditions plan', c: '50.25.1', d: 'Current buildings, paving, trees and utilities on the site.' });
+    it.push({ id: 'site', l: 'Dimensioned site plan', c: '50.25.1', d: 'Property lines, setbacks, buildings, driveways and parking, with dimensions.' });
+    if (T(1) || T(2) || bld || T(6) || T(8)) it.push({ id: 'elev', l: 'Architectural elevations, existing and proposed', c: '40.21.15.1.C', d: 'Every elevation that changes' + (T(1) || T(2) ? ', with the windows and doors and their sizes' : '') + '.' });
+    if (T(1) || T(2)) it.push({ id: 'wd', l: 'Window and door schedule', c: table[0], d: 'Sizes and locations, to check the window and entry standards.' });
+    if (T(5) || T(9) || T(10)) it.push({ id: 'fa', l: 'Existing and proposed [[Floor Area|floor area]]', c: siteDev(z), d: 'For the floor-area ratio and size limits.' });
+    if (f.grade === 'yes' || newc) it.push({ id: 'grade', l: 'Grading plan', c: '60.15.10', d: 'Existing and proposed grades, especially within 25 ft of property lines.' });
+    if (newc) it.push({ id: 'util', l: 'Utility plan', c: '50.25.1', d: 'Water, sewer and storm connections.' });
+    if (T(3) || newc) it.push({ id: 'land', l: 'Landscape plan', c: T(3) ? '60.60.25.9' : '60.05.60', d: T(3) ? 'Trees to be removed with species and DBH, and replacement trees with species and caliper.' : 'Required trees and landscaping.' });
+    if (f.light === 'yes') it.push({ id: 'light', l: 'Lighting plan', c: '60.05.30', d: 'Checked against Table 60.05-1.' });
+    if (f.ldhp === 'yes') it.push({ id: 'ldhp', l: 'Approved Land Division Housing Plan, or a concurrent amendment', c: '40.21.15.1.C.10', d: 'Because the change reduces dwelling units or affects visitability.' });
+    if (bld) it.push({ id: 'svc', l: 'Service provider documentation', c: '50.25.1.F', d: 'Clean Water Services, Tualatin Valley Fire & Rescue and Beaverton School District, as applicable.' });
+    /* Standards */
+    const st = r.standards;
+    st.push(['40.21.15.1.C', 'SDMHDR One approval criteria']);
+    st.push([siteDev(z), `Site development standards for ${z} (criterion 4)`]);
+    if (newc || T(5)) st.push(['20.25.10', 'Density and bulk (20.25.05–20.25.10)']);
+    st.push([table[0], table[1]]);
+    if (f.ht === 'ssc' || T(9)) st.push(['20.22.35', 'CM-RM small-scale commercial (criterion 5)']);
+    if (T(4) || T(6) || T(7)) { st.push(['60.30.10', 'Number of parking spaces']); st.push(['60.30.15', 'Off-street parking design']); }
+    if (T(7)) st.push(['60.50.05', 'Residential accessory structures']);
+    if (T(4)) st.push(['60.55', 'Transportation facilities and connections']);
+    if (T(3)) st.push(['60.60.25.9', 'Landscape Tree replacement']);
+    if (f.grade === 'yes' || newc) st.push(['60.15.10', 'Grading standards (criterion 9)']);
+    if (f.light === 'yes') st.push(['60.05.30', 'Lighting design and Table 60.05-1']);
+    r.guards.push('Pre-application notes and Neighborhood Review Meeting materials: those are Type 3 only.');
+    r.guards.push('Plans that don\'t apply: a window-only change needs no tree or utility information.');
+    if (T(3)) TREE_GUARDS.forEach(g => r.guards.push(g));
+    r.guards.push(NO_FEES);
+    return r;
+  }
+},
+
+/* ===== Legal Lot Determination ===== */
+lld: {
+  name: 'Legal Lot Determination', short: 'LLD', code: '40.47.15.1', blurb: 'Confirms a parcel was lawfully created',
+  facts: [
+    { k: 'thr', t: 'radio', col: true, l: 'Why is the determination being requested? (40.47.15.1.A)', o: [
+      ['1','The owner wants it for one or more contiguous lots under the same ownership'],
+      ['2','The owner or contract purchaser wants to validate a unit of land created by sale'],
+      ['3','The Director requires it before or with another land use application']] },
+    { k: 'pre', t: 'yesno', l: 'Did the sale happen before January 1, 2007?', show: f => f.thr === '2' },
+    { k: 'flood', t: 'yesno', l: 'Is any of the property in the 100-year floodplain?', d: 'no' },
+    { k: 'title', t: 'yesno', l: 'Has staff asked for a deed history and title report?', d: 'no' }
+  ],
+  evaluate(f, z) {
+    const r = { notes: [], standards: [], items: [], guards: [] };
+    if (!f.thr) { r.scope = { k: 'incomplete', t: 'Pick the reason for the request', x: 'The threshold decides who may apply and what they must show.' }; return r; }
+    if (f.thr === '2' && f.pre === 'no') { r.scope = { k: 'route', t: 'This threshold doesn\'t apply', x: 'Validating a unit of land created by sale only covers sales before January 1, 2007 ({40.47.15.1.A}).' }; return r; }
+    if (f.thr === '2' && !f.pre) { r.scope = { k: 'incomplete', t: 'Confirm the sale date', x: 'Answer whether the sale happened before January 1, 2007.' }; return r; }
+    r.scope = { k: 'ok', t: 'Type 1 Legal Lot Determination', x: 'The request meets a Legal Lot Determination threshold ({40.47.15.1.A}). The Director decides it under the Type 1 procedure.' };
+    if (f.thr === '2') r.notes.push({ k: 'info', x: 'For land created by sale before 2007, the Director may still deem it a legal lot if it could have met the rules in effect at the time of sale, or if a dwelling was later permitted on it with all the features in ORS 215.755(1)(a)–(e) ({40.47.15.1.C}).' });
+    if (f.thr === '3') r.notes.push({ k: 'info', x: 'Because the Director required it, file it before or with the related application, in the proper sequence ({40.47.15.1.C}).' });
+    const it = r.items;
+    it.push({ id: 'form', l: 'Application form, signed', c: '40.47.15.1.D', d: 'By the owner, the owner\'s authorized agent, or a contract purchaser' + (f.thr === '2' ? '. For land created by sale before 2007, fewer than all owners may apply.' : '.') });
+    it.push({ id: 'chk', l: 'Completed application checklist', c: '50.25.1.A', d: '' });
+    it.push({ id: 'stmt', l: 'Written statement', c: '50.25.1.B', d: `Addresses the Chapter 20 minimum land area, lot dimensions and setbacks for ${z} ({${siteDev(z)}}), with findings for each criterion in {40.47.15.1.C}.` });
+    it.push({ id: 'plan', l: 'Legal Lot Determination plan, to scale', c: '40.47.15.1.D', d: 'Existing property lines, sizes and dimensions, and public and private easements and utilities on or next to the property' + (f.flood === 'yes' ? '; the 100-year floodplain' : '') + '.' });
+    if (f.thr === '2') it.push({ id: 'sworn', l: 'Sworn statement from the purchaser', c: '40.47.15.1.D', d: 'That their interest was represented as a discrete lot or parcel at purchase, but it appears to have been improperly created.' });
+    if (f.title === 'yes') it.push({ id: 'title', l: 'Deed history and title report', c: '50.25.1.C', d: 'Requested because staff could not determine that the unit of land is a [[Lot of Record]].' });
+    it.push({ id: 'cws', l: 'Clean Water Services documentation', c: '50.25.1.F', d: '' });
+    r.standards.push(['40.47.15.1.C', 'Legal Lot Determination approval criteria']);
+    r.standards.push([siteDev(z), `Minimum area and dimensional standards for ${z}`]);
+    r.guards.push('A deed history and title report by default: ask for it only if staff can\'t confirm the lot.');
+    r.guards.push(NO_FEES);
+    return r;
+  }
+},
+
+/* ===== Landscape tree removal ===== */
+tree: {
+  name: 'Landscape Tree removal', short: 'Tree removal', code: '40.90.10', blurb: 'Removing trees from an approved landscape plan',
+  facts: [
+    { k: 'site', t: 'radio', l: 'What is on the site?', o: [['nonres','Commercial, industrial, multiple-use or other non-residential'],['housing','Single-detached dwelling or middle housing']], d: 'nonres' },
+    { k: 'kind', t: 'radio', col: true, l: 'Which kind of tree is it?', o: [
+      ['land','Landscape Tree: planted or kept under an approved landscape plan'],
+      ['prot','Protected Tree: Significant or Historic, in an SNRA or Significant Grove, or a Mitigation Tree'],
+      ['comm','Community Tree: not part of any approved landscape plan']], d: 'land' },
+    { k: 'haz', t: 'yesno', l: 'Has a certified arborist found it hazardous, dead or diseased, with the City requiring removal?', d: 'no' },
+    { k: 'n', t: 'num', l: 'Number of trees to remove', d: 1 },
+    { k: 'dbh', t: 'num', l: 'Total DBH of the trees to remove (inches)', h: 'Diameter at breast height, added up across all trees.' },
+    { k: 'creek', t: 'yesno', l: 'Does the site abut a creek or sit in a mapped resource area?', d: 'no' }
+  ],
+  evaluate(f, z) {
+    const r = { notes: [], standards: [], items: [], guards: [] };
+    if (f.kind === 'prot') { r.scope = { k: 'route', t: 'Not a Landscape Tree removal: use a Tree Plan', x: 'Removing a [[Protected Tree]] needs a Tree Plan application ({40.90.15}), which has its own thresholds, mitigation and possible fee-in-lieu.' }; return r; }
+    if (f.kind === 'comm') { r.scope = { k: 'route', t: 'Probably no land use application needed', x: 'Up to four Community Trees, or 10% of them, whichever is more, can be removed per year without a Tree Plan. Sites of half an acre or less with a house or middle housing can remove any number ({40.90.10.1}).' }; return r; }
+    if (f.haz === 'yes') { r.scope = { k: 'route', t: 'Hazard removal: no Tree Plan needed', x: 'Removing a tree a certified arborist or the City Arborist identifies as hazardous, dead or diseased, where the City requires removal, needs no Tree Plan ({40.90.10.2}). This is the one path where the arborist\'s determination is required.' }; return r; }
+    const sd = f.site === 'housing';
+    r.letterName = (sd ? 'Single-Detached & Middle Housing Design Review One' : 'Design Review Compliance Letter') + ' (Landscape Tree removal)';
+    r.scope = { k: 'ok', t: `Type 1 ${sd ? 'SDMHDR One' : 'Design Review Compliance Letter'} (Landscape Tree removal)`, x: `[[Landscape Tree|Landscape Trees]] are covered by Design Review and 60.60 ({40.90.10|40.90.10.15}). Here that means ${sd ? 'SDMHDR One, threshold A.3 ({40.21.15.1.A})' : 'a DRCL, action A.1.i ({40.20.15.1.A})'}, decided under the Type 1 procedure ({50.35}).` };
+    const dbh = num(f.dbh);
+    if (dbh) r.notes.push({ k: 'ok', x: `Replacement: at least **${fmt(dbh)} caliper inches** in total, one-to-one with the removed DBH, using trees of 1.5 in. caliper or larger. Use a similar species or one the City approves ({60.60.25.9}).` });
+    else r.notes.push({ k: 'info', x: 'Enter the total DBH to calculate the replacement: total caliper inches must at least equal the removed DBH, with each tree at least 1.5 in. caliper ({60.60.25.9}).' });
+    if (f.creek === 'yes') r.notes.push({ k: 'warn', x: 'The site abuts a creek or a mapped resource area: screen for Resource Overlay review (40.70 and {60.37}).' });
+    const it = r.items;
+    it.push({ id: 'form', l: `${sd ? 'SDMHDR' : 'Design Review Compliance Letter'} application form and checklist, signed`, c: '50.25.1.A', d: 'Signed by the owner, or by an agent with the owner\'s written authorization.' });
+    it.push({ id: 'stmt', l: 'Written statement', c: '50.25.1.B', d: `Addresses the approval criteria in {${sd ? '40.21.15.1.C' : '40.20.15.1.C'}} and the Landscape Tree replacement standards in {60.60.25.9}.` });
+    it.push({ id: 'site', l: 'Site plan', c: '50.25.1', d: 'Trees to be removed and where the replacement trees will go.' });
+    it.push({ id: 'list', l: 'Tree list', c: '60.60.25.9.C', d: 'Species and [[Diameter at Breast Height (DBH)|DBH]] of each tree to be removed.' });
+    it.push({ id: 'land', l: 'Landscape plan with replacement trees', c: '60.60.25.9', d: 'Species and caliper of each replacement tree.' });
+    r.standards.push([sd ? '40.21.15.1.C' : '40.20.15.1.C', `${sd ? 'SDMHDR One' : 'DRCL'} approval criteria`]);
+    r.standards.push(['60.60.25.9', 'Landscape Tree replacement']);
+    r.standards.push([siteDev(z), `Site development standards for ${z}`]);
+    if (f.creek === 'yes') r.standards.push(['60.37', 'Resource Overlay standards']);
+    TREE_GUARDS.forEach(g => r.guards.push(g));
+    r.guards.push(NO_FEES);
+    return r;
+  }
+}
+};
+
+/* ---------- Examples ---------- */
+const EXAMPLES = {
+  sign: { type: 'sign', zone: 'CS', site: '1234 SW Example Ave', applicant: 'Sample Signs LLC', caseNo: 'SP2026-0001',
+    f: { wall: '3', areas: '48, 36, 24', len: '90', ht: '22', exist: '40', fs: '0', other: [], illum: 'yes', multi: 'no', inv: 'no' },
+    status: { form: 'r', stmt: 'r', inv: 'm', rend: 'r', site: 'r', elev: 'd', pbw: 'm' }, notes: { elev: 'Mounting heights are not dimensioned.' } },
+  drcl: { type: 'drcl', zone: 'GC', site: '5678 SW Sample Blvd', applicant: 'Example Retail Partners', caseNo: 'DR2026-0002',
+    f: { bldg: 'nonres', acts: ['a', 'k'], gfa: 'yes', exGfa: '9000', addGfa: '1800', flags: ['roof'], beyond: 'no' },
+    status: { form: 'r', stmt: 'd', gfa: 'r', site: 'r', elev: 'r', light: 'm', cws: 'm' }, notes: { stmt: 'Doesn\'t address criterion 4 (site development standards).' } },
+  sdmh: { type: 'sdmh', zone: 'RMA', site: '910 SW Placeholder St', applicant: 'Sample Homeowner', caseNo: 'SDM2026-0003',
+    f: { ht: 'sd', th: ['1', '2'], std: 'yes', grade: 'no', light: 'no', ldhp: 'no' },
+    status: { form: 'r', stmt: 'r', site: 'r', elev: 'd', wd: 'm' }, notes: { elev: 'Only proposed elevations; existing are missing.' } },
+  tree: { type: 'tree', zone: 'CS', site: '1234 SW Example Ave', applicant: 'Example Property Management', caseNo: 'DR2026-0004',
+    f: { site: 'nonres', kind: 'land', haz: 'no', n: '1', dbh: '14', creek: 'no' },
+    status: { form: 'r', stmt: 'r', site: 'r', list: 'm', land: 'm' }, notes: {} },
+  route: { type: 'drcl', zone: 'CS', site: '5678 SW Sample Blvd', applicant: 'Example Retail Partners', caseNo: '',
+    f: { bldg: 'nonres', acts: [], gfa: 'yes', exGfa: '9000', addGfa: '3200', flags: [], beyond: 'no' }, status: {}, notes: {} }
+};
+
+/* ---------- State ---------- */
+const S = { type: null, zone: '', site: '', applicant: '', caseNo: '', f: {}, status: {}, notes: {}, tab: 'check' };
+const $ = id => document.getElementById(id);
+function defaults(type) { const f = {}; TYPES[type].facts.forEach(q => { if (q.d !== undefined) f[q.k] = String(q.d); else if (q.t === 'checks') f[q.k] = []; }); return f; }
+
+/* ---------- Render: step 1 ---------- */
+function renderTypes() {
+  $('types').innerHTML = Object.entries(TYPES).map(([id, t]) =>
+    `<label><input type="radio" name="type" value="${id}"${S.type === id ? ' checked' : ''}><b>${esc(t.short)}</b><small>${esc(t.blurb)}</small></label>`).join('');
+  $('types').querySelectorAll('input').forEach(i => i.addEventListener('change', () => { setType(i.value); }));
+}
+function renderZones() {
+  $('zone').innerHTML = '<option value="">Choose a zone…</option>' + ZONES.map(([g, zs]) =>
+    `<optgroup label="${esc(g)}">${zs.map(([c, n]) => `<option value="${c}"${S.zone === c ? ' selected' : ''}>${c} · ${esc(n)}</option>`).join('')}</optgroup>`).join('');
+}
+function setType(id) { S.type = id; S.f = defaults(id); S.status = {}; S.notes = {}; renderFacts(); update(); }
+
+/* ---------- Render: step 2 ---------- */
+function renderFacts() {
+  const box = $('facts');
+  if (!S.type) { box.innerHTML = ''; $('c2sub').textContent = 'Choose an application type to see its questions.'; return; }
+  const T = TYPES[S.type];
+  $('c2sub').innerHTML = rich(`${T.name} · {${T.code}}. These answers decide whether it's Type 1 and which items and standards apply.`);
+  box.innerHTML = T.facts.map(q => {
+    if (q.show && !q.show(S.f, S.zone)) return '';
+    const v = S.f[q.k], name = 'f_' + q.k, help = q.h ? ` <small>${esc(q.h)}</small>` : '';
+    let ctl = '';
+    if (q.t === 'num') ctl = `<input type="number" min="0" step="any" inputmode="decimal" data-k="${q.k}" value="${esc(v || '')}" aria-label="${esc(q.l)}">`;
+    else if (q.t === 'text') ctl = `<input type="text" data-k="${q.k}" value="${esc(v || '')}" aria-label="${esc(q.l)}">`;
+    else {
+      const opts = q.t === 'yesno' ? [['yes', 'Yes'], ['no', 'No']] : q.o, type = q.t === 'checks' ? 'checkbox' : 'radio';
+      ctl = `<div class="opts${q.col ? ' col' : ''}" role="${type === 'radio' ? 'radiogroup' : 'group'}" aria-label="${esc(q.l)}">${opts.map(([ov, ol]) => {
+        const on = type === 'checkbox' ? has(v, ov) : v === ov;
+        return `<label><input type="${type}" name="${name}" data-k="${q.k}" value="${ov}"${on ? ' checked' : ''}><span>${esc(ol)}</span></label>`; }).join('')}</div>`;
+    }
+    return `<div class="q"><div class="ql">${esc(q.l)}${help}</div>${ctl}</div>`;
+  }).join('');
+  lastVisible = keysNow();
+  box.querySelectorAll('[data-k]').forEach(el => {
+    const k = el.dataset.k, ev = el.type === 'checkbox' || el.type === 'radio' ? 'change' : 'input';
+    el.addEventListener(ev, () => {
+      if (el.type === 'checkbox') S.f[k] = [...box.querySelectorAll(`input[data-k="${k}"]:checked`)].map(x => x.value);
+      else S.f[k] = el.value;
+      if (keysNow() !== lastVisible) { renderFacts(); refocus(k, el.value); }
+      update();
+    });
+  });
+}
+let lastVisible = '';
+const keysNow = () => S.type ? TYPES[S.type].facts.filter(q => !q.show || q.show(S.f, S.zone)).map(q => q.k).join(',') : '';
+function refocus(k, val) {
+  if (!k) return;
+  const el = [...$('facts').querySelectorAll(`[data-k="${k}"]`)].find(e => (e.type !== 'radio' && e.type !== 'checkbox') || e.value === val);
+  if (el) { el.focus(); if (el.type === 'number' || el.type === 'text') { const n = el.value.length; try { el.setSelectionRange(n, n); } catch (e) {} } }
+}
+
+/* ---------- Evaluate + render steps 3 and 4 ---------- */
+let R = null;
+function update() {
+  R = null;
+  if (S.type && S.zone) R = TYPES[S.type].evaluate(S.f, S.zone);
+  renderScope(); renderOut();
+}
+function renderScope() {
+  const box = $('scope');
+  if (!S.type || !S.zone) { box.innerHTML = `<p class="empty">${!S.type ? 'Choose an application type' : 'Choose the zoning district'} in step 1.</p>`; return; }
+  const sc = R.scope;
+  let h = `<div class="banner ${sc.k}"><b>${rich(sc.t)}</b>${rich(sc.x)}</div>`;
+  if (R.notes.length) h += `<ul class="notes">${R.notes.map(n => `<li class="${n.k}">${rich(n.x)}${n.link ? ` <a href="${n.link}" target="_blank" rel="noopener">Open the Design Review Helper</a>` : ''}</li>`).join('')}</ul>`;
+  if (sc.k === 'ok') {
+    h += `<h3>Submittal items</h3><ul class="items">${R.items.map(it => {
+      const s = S.status[it.id] || '';
+      return `<li><div class="it"><b>${rich(it.l)}</b> <span class="cite">${cite(it.c)}</span>${it.d ? `<p>${rich(it.d)}</p>` : ''}</div>
+        <div class="seg" role="group" aria-label="Status of ${esc(plain(rich(it.l)))}">${[['r', 'Received'], ['m', 'Missing'], ['d', 'Deficient']].map(([k, l]) =>
+          `<button type="button" class="${k}" data-id="${it.id}" data-s="${k}" aria-pressed="${s === k}">${l}</button>`).join('')}</div>
+        ${s === 'd' ? `<input type="text" class="dnote" data-note="${it.id}" placeholder="What's deficient? (goes in the letter)" value="${esc(S.notes[it.id] || '')}" aria-label="Deficiency note">` : ''}</li>`;
+    }).join('')}</ul>`;
+    if (R.guards.length) h += `<h3>Not completeness items</h3><ul class="guards">${R.guards.map(g => `<li>${rich(g)}</li>`).join('')}</ul>`;
+  }
+  box.innerHTML = h;
+  box.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.id; S.status[id] = S.status[id] === b.dataset.s ? '' : b.dataset.s;
+    renderScope(); renderOut(); const again = box.querySelector(`button[data-id="${id}"][data-s="${b.dataset.s}"]`); if (again) again.focus();
+    if (S.status[id] === 'd') { const n = box.querySelector(`[data-note="${id}"]`); if (n) n.focus(); }
+  }));
+  box.querySelectorAll('[data-note]').forEach(i => i.addEventListener('input', () => { S.notes[i.dataset.note] = i.value; renderOut(); }));
+}
+
+const ph = s => `<span class="ph">[${esc(s)}]</span>`;
+const stdHtml = list => `<ul class="std">${list.map(([sec, why]) => `<li>${sec === 'EDM' ? `<a href="${EDM}" target="_blank" rel="noopener">Engineering Design Manual</a>` : cite(sec)} <span class="why">· ${rich(why)}</span></li>`).join('')}</ul>`;
+const today = () => new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+function header() {
+  const T = TYPES[S.type], z = ZINFO[S.zone];
+  return { T, z, site: S.site ? esc(S.site) : ph('SITE ADDRESS'), app: S.applicant ? esc(S.applicant) : ph('APPLICANT NAME'), cs: S.caseNo ? esc(S.caseNo) : ph('CASE NUMBER') };
+}
+function renderOut() {
+  const out = $('out');
+  ['check', 'letter'].forEach(t => $('t-' + t).setAttribute('aria-selected', String(S.tab === t)));
+  if (!R) { out.innerHTML = '<p class="empty">Outputs appear once you pick an application type and zone.</p>'; return; }
+  const H = header(), sc = R.scope;
+  if (S.tab === 'check') {
+    const label = { r: 'Received', m: 'Missing', d: 'Deficient' };
+    let h = `<h4 style="margin-top:0">Internal completeness checklist</h4>
+      <table><tbody><tr><th>Application</th><td>${esc(R.letterName || H.T.name)} (${cite(H.T.code)})</td></tr>
+      <tr><th>Zone</th><td>${esc(H.z.code)} · ${esc(H.z.name)}</td></tr><tr><th>Site</th><td>${H.site}</td></tr>
+      <tr><th>Applicant</th><td>${H.app}</td></tr><tr><th>Case</th><td>${H.cs}</td></tr>
+      <tr><th>Scope</th><td><b>${rich(sc.t)}</b><br>${rich(sc.x)}</td></tr></tbody></table>`;
+    if (R.notes.length) h += `<h4>Review notes</h4><ul class="std">${R.notes.map(n => `<li>${rich(n.x)}</li>`).join('')}</ul>`;
+    if (sc.k === 'ok') {
+      h += `<h4>Submittal items</h4><table><thead><tr><th>Status</th><th>Item</th><th>Citation</th></tr></thead><tbody>${R.items.map(it => {
+        const s = S.status[it.id] || 'u';
+        return `<tr><td><span class="st ${s}">${label[s] || 'Not marked'}</span></td><td>${rich(it.l)}${s === 'd' && S.notes[it.id] ? `<br><i>${esc(S.notes[it.id])}</i>` : ''}</td><td>${cite(it.c)}</td></tr>`; }).join('')}</tbody></table>`;
+      h += `<h4>Applicable standards</h4>${stdHtml(R.standards)}`;
+      if (R.guards.length) h += `<h4>Not completeness items</h4><ul class="std">${R.guards.map(g => `<li>${rich(g)}</li>`).join('')}</ul>`;
+    }
+    out.innerHTML = h; return;
+  }
+  /* Letter */
+  if (sc.k !== 'ok') { out.innerHTML = `<p class="empty">No letter: ${esc(plain(rich(sc.t)))}. Resolve the scope in step 3 first.</p>`; return; }
+  const miss = R.items.filter(it => S.status[it.id] === 'm' || S.status[it.id] === 'd');
+  const unmarked = R.items.filter(it => !S.status[it.id]);
+  let warn = unmarked.length ? `<p class="banner warn" style="font-size:14px"><b>${unmarked.length} item${unmarked.length === 1 ? '' : 's'} not marked yet</b>Unmarked items are left out of the letter: ${unmarked.map(it => esc(plain(rich(it.l)))).join('; ')}.</p>` : '';
+  if (!miss.length) {
+    out.innerHTML = warn + (unmarked.length ? '' : `<p><b>The application appears complete.</b> No incompleteness letter is needed: it's ready for review on the merits (<span>${cite('50.25.3')}</span>). It will be reviewed against:</p>${stdHtml(R.standards)}`);
+    if (unmarked.length) out.innerHTML += '<p class="empty">Nothing is marked missing or deficient yet.</p>';
+    return;
+  }
+  out.innerHTML = warn + `<div id="letter">
+    <p>City of Beaverton · Community Development Department<br>Planning Division</p>
+    <p>${today()}</p>
+    <p>${H.app}<br>${ph('APPLICANT ADDRESS')}</p>
+    <p><b>RE: Application ${H.cs}: ${esc(R.letterName || H.T.name)} at ${H.site} (${esc(H.z.code)})</b></p>
+    <p>Dear ${H.app}:</p>
+    <p>The City has reviewed the above application for completeness under Beaverton Development Code (BDC) Section ${cite('50.25', '50.25')}. The application is <b>incomplete</b>. Before the City can begin review on the merits, please provide the following:</p>
+    <h4>Missing or deficient submittal items</h4>
+    <ol>${miss.map(it => `<li><b>${rich(it.l)}</b>: ${S.status[it.id] === 'd' ? 'deficient' + (S.notes[it.id] ? ' (' + esc(S.notes[it.id]) + ')' : '') : 'missing'}.${it.d ? ' ' + rich(it.d) : ''} Required by ${cite(it.c)}.</li>`).join('')}</ol>
+    <h4>Applicable standards the submittal must address</h4>
+    <p>This ${esc(R.letterName || H.T.name)} is reviewed against the following standards. Your written statement and exhibits should show compliance with each:</p>
+    ${stdHtml(R.standards)}
+    <h4>Next steps and timeline</h4>
+    <p>Under ${cite('50.25.5', 'BDC 50.25.5')}, you may respond by submitting (a) all of the missing information; (b) some of it, with written notice that no other information will be provided; or (c) written notice that none will be provided. The application will be deemed complete on receipt of one of these. An application on file more than 180 days without a response becomes void (${cite('50.25.9', 'BDC 50.25.9')}).</p>
+    <p>If you have questions, please contact me.</p>
+    <p>Sincerely,</p>
+    <p>${ph('PLANNER NAME')}<br>${ph('TITLE')}, City of Beaverton Planning Division<br>${ph('PHONE')} · ${ph('EMAIL')}</p></div>`;
+}
+
+/* ---------- Wiring ---------- */
+renderTypes(); renderZones();
+document.querySelectorAll('[data-cite]').forEach(e => e.innerHTML = cite(e.dataset.cite));
+$('zone').addEventListener('change', e => { S.zone = e.target.value; renderFacts(); update(); });
+['site', 'applicant', 'caseNo'].forEach(k => $(k).addEventListener('input', e => { S[k] = e.target.value; renderOut(); }));
+['check', 'letter'].forEach(t => $('t-' + t).addEventListener('click', () => { S.tab = t; renderOut(); }));
+$('print').addEventListener('click', () => window.print());
+$('copy').addEventListener('click', async () => {
+  const node = $('letter') && S.tab === 'letter' ? $('letter') : $('out');
+  const html = node.innerHTML, text = node.innerText;
+  try {
+    if (window.ClipboardItem) await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })]);
+    else await navigator.clipboard.writeText(text);
+    $('copied').textContent = 'Copied';
+  } catch (e) { $('copied').textContent = 'Copy failed: select the text and copy it instead'; }
+  $('copied').classList.remove('hidden'); setTimeout(() => $('copied').classList.add('hidden'), 2500);
+});
+document.querySelectorAll('[data-ex]').forEach(b => b.addEventListener('click', () => {
+  const ex = EXAMPLES[b.dataset.ex];
+  Object.assign(S, { type: ex.type, zone: ex.zone, site: ex.site, applicant: ex.applicant, caseNo: ex.caseNo,
+    f: Object.assign(defaults(ex.type), JSON.parse(JSON.stringify(ex.f))), status: Object.assign({}, ex.status), notes: Object.assign({}, ex.notes), tab: Object.keys(ex.status).length ? 'letter' : 'check' });
+  renderTypes(); renderZones(); ['site', 'applicant', 'caseNo'].forEach(k => $(k).value = S[k]);
+  renderFacts(); update();
+  $('c3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+update();
+})();
+</script>
+</body>
+</html>

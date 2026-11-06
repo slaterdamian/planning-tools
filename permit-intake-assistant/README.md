@@ -1,15 +1,29 @@
 # Development code intake assistant (Beaverton Type 1)
 
-An AI assistant, packaged as a Claude skill, that helps a planner check whether a City of
+**[Live demo →](https://slaterdamian.github.io/planning-tools/permit-intake-assistant/)**
+
+A completeness-review assistant that helps a planner check whether a City of
 Beaverton Type 1 land use application is complete. It covers sign permits, Design Review
 Compliance Letters, Single-Detached & Middle Housing Design Review One, Legal Lot Determinations,
 landscape tree removals and other Chapter 40 applications.
+
+It comes in two versions:
+
+- **Web tool (`index.html`, the live demo).** A rule-based version that runs in any browser with no
+  AI and no account. Pick the application type and zone, answer the threshold questions, and mark
+  each submittal item as received, missing or deficient. It returns the Type 1 scope decision (or
+  where to route the application instead), the zone-specific checklist, preliminary review math
+  such as the 20% wall-sign allowance or tree replacement inches, the applicable standards, and a
+  draft incompleteness letter you can copy or print. It covers the five most common paths: Sign
+  Permit, DRCL, SDMHDR One, Legal Lot Determination and Landscape Tree removal.
+- **AI version (`SKILL.md` + `references/`).** A Claude skill that reads a free-text proposal or
+  uploaded PDFs, works from the full code text, and handles any Chapter 40 application.
 
 The point is to show a **repeatable way to interpret code**. The assistant works from the
 bundled code text, follows a set order of steps, and cites the exact section for every
 requirement instead of answering from memory.
 
-## How it works
+## How the AI version works
 
 1. **Understand the proposal** and confirm the zoning district. Sign and design standards differ
    sharply by zone, so it asks for the zone if it isn't given.
@@ -33,6 +47,7 @@ Design Review Compliance Letter threshold), so the model doesn't make them.
 
 ## Files
 
+- `index.html`: the web tool. One self-contained file; the rules live in the `TYPES` object.
 - `SKILL.md`: the assistant's instructions.
 - `references/`: the Beaverton Development Code text (Chapters 10–70), transcribed application
   checklists, key definitions, and section-to-link lookup tables.
