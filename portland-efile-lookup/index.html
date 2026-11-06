@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portland eFile Lookup</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    max-width: 480px;
+    margin: 60px auto;
+    padding: 0 20px;
+    color: #222;
+  }
+  h1 { font-size: 1.1rem; margin-bottom: 4px; }
+  p.sub { color: #666; font-size: 0.85rem; margin-top: 0 0 24px; }
+  label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-family: monospace;
+  }
+  input:focus { outline: 2px solid #0057a8; border-color: transparent; }
+  button {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px;
+    background: #0057a8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  button:hover { background: #004080; }
+  button:disabled { background: #aaa; cursor: default; }
+  .preview {
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: #555;
+    min-height: 1.2em;
+  }
+  .error { color: #c00; }
+</style>
+</head>
+<body>
+<h1>Portland eFile Case Lookup</h1>
+<p class="sub">Enter a PortlandMaps case number to open it in eFiles.</p>
+
+<label for="caseInput">Case number (PortlandMaps format)</label>
+<input id="caseInput" type="text" placeholder="e.g. 2024-073629-000-00-LU" spellcheck="false">
+<div class="preview" id="preview"></div>
+<button id="goBtn" disabled>Open in eFiles →</button>
+
+<script>
+  const input = document.getElementById('caseInput');
+  const preview = document.getElementById('preview');
+  const btn = document.getElementById('goBtn');
+
+  function parse(val) {
+    // Expected: 2024-073629-000-00-LU
+    const m = val.trim().match(/^(\d{2})(\d{2})-(\d+)-\d+-\d+-LU$/i);
+    if (!m) return null;
+    return `LU ${m[2]}-${m[3]}`;
+  }
+
+  function buildUrl(efileRef) {
+    const q = encodeURIComponent(`recAnyWord:${efileRef}`);
+    return `https://efiles.portlandoregon.gov/Record?q=${q}&sortBy=recCreatedOn&pagesize=25`;
+  }
+
+  input.addEventListener('input', () => {
+    const ref = parse(input.value);
+    if (!ref) {
+      preview.textContent = input.value.trim() ? '⚠ Unrecognized format' : '';
+      preview.className = input.value.trim() ? 'preview error' : 'preview';
+      btn.disabled = true;
+    } else {
+      preview.textContent = `→ eFiles: ${ref}`;
+      preview.className = 'preview';
+      btn.disabled = false;
+    }
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !btn.disabled) btn.click();
+  });
+
+  btn.addEventListener('click', () => {
+    const ref = parse(input.value);
+    if (ref) window.open(buildUrl(ref), '_blank');
+  });
+</script>
+</body>
+</html>
