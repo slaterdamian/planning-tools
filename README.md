@@ -10,7 +10,7 @@ nothing here is legal or permitting advice.
 | Project | What it does | Try it |
 |---|---|---|
 | [Development code intake assistant](permit-intake-assistant/) | An AI assistant for completeness review of Beaverton Type 1 land use applications. It works from the full Development Code and the city's application forms. | [Instructions and code text](permit-intake-assistant/SKILL.md) |
-| [PDF-to-web-form converter](form-porter/) | Reads a city application PDF, extracts every field, infers what each one expects, and rebuilds the form as a web form with a JSON schema. | [Live demo](https://slaterdamian.github.io/planning-tools/form-porter/) |
+| [Planning Forms Porter](form-porter/) | Reads a city application PDF, extracts every field, infers what each one expects, and rebuilds the form as a web form with a JSON schema. | [Live demo](https://slaterdamian.github.io/planning-tools/form-porter/) |
 | [Design Review Helper](design-review-helper/) | A questionnaire that finds which Beaverton design standards and guideline alternatives in Table 60.05.60.2 apply to a residential or small commercial project. | [Live demo](https://slaterdamian.github.io/planning-tools/design-review-helper/) |
 | [Portland eFile case lookup](portland-efile-lookup/) | Converts a PortlandMaps land use case number to the eFiles format and opens the matching public records search. | [Live demo](https://slaterdamian.github.io/planning-tools/portland-efile-lookup/) |
 | [GTFS frequent-transit toolbox](gtfs-frequent-service/) | An ArcGIS Pro toolbox that classifies transit stops by frequency and builds half-mile access areas around frequent stops and rail lines. | [Toolbox](gtfs-frequent-service/GTFS_Frequent_Service.pyt) |
