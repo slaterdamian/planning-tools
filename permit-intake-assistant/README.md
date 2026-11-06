@@ -28,8 +28,8 @@ requirement instead of answering from memory.
 6. **Draft two outputs:** an internal checklist and an incompleteness letter. Every code section
    and defined term is linked to the city's online code (encodePlus).
 
-The skill also records corrections for mistakes found in earlier runs (for example, the real
-Design Review Compliance Letter threshold), so they aren't repeated.
+The skill also lists known misinterpretations to avoid (for example, the real
+Design Review Compliance Letter threshold), so the model doesn't make them.
 
 ## Files
 

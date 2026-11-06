@@ -1,13 +1,13 @@
 # Type 1 application catalog (Beaverton, administrative / no hearing)
 
-This planner reviews **Type 1** decisions only — administrative, no public hearing (procedure in BDC 50.35).
+This skill covers **Type 1** decisions only — administrative, no public hearing (procedure in BDC 50.35).
 The four most common are **Sign Permit, DRCL, SDMHDR1, and LLD**. For any application, the authoritative
 text is in the bundled chapters; always open the cited section and read it rather than relying on memory,
 because thresholds and zone lists change by ordinance.
 
-Two rules that apply to every intake on this desk:
-- **Fees are already paid** before the file reaches the planner. Never list fee payment (50.25.1.G) as a
-  missing completeness item — it is satisfied by definition here.
+Two rules that apply to every intake:
+- **Assumes fees are collected before review.** Don't list fee payment (50.25.1.G) as a
+  missing completeness item.
 - A complete application (50.25.1) always needs, at minimum: (A) the signed application form with owner
   consent or authorized-agent authorization, and (B) a written statement addressing the relevant approval
   criteria and development standards. Then add the **type-specific plans/exhibits** below.
@@ -45,7 +45,7 @@ related approvals sequenced.
 - Illumination details (type), material/colors where a downtown design standard applies.
 - Cumulative tally of existing + proposed sign area on the site (60.40.30.1 counts existing signs).
 
-**Corrections — do NOT do these (common past errors):**
+**Known misinterpretations to avoid:**
 - Do **not** require a structural/engineer's stamp for freestanding signs as a planning item — that is a
   Building Division routing matter, not a planning-completeness item.
 - Signs **never** require Design Review. Do not flag a Design Review threshold for a sign.
@@ -108,7 +108,7 @@ recorded plat or survey references; tax-lot map.
 Per **40.90.10.15**, removal of **Landscape Trees** is covered by Design Review (40.20) and 60.60 (Trees and
 Vegetation) — not the Tree Plan applications, which address Protected Trees, SNRAs, significant groves, etc.
 
-**Corrections (common past errors):**
+**Known misinterpretations to avoid:**
 - An **arborist letter is NOT required for landscape tree removal**. An arborist letter is for **hazard tree**
   removals — a hazard tree being one posing an imminent threat to people or structures (confirm the exact
   Chapter 90 definition live). A dead tree or a tree too close to a foundation, absent a hazard finding, is a
@@ -125,6 +125,6 @@ Vegetation) — not the Tree Plan applications, which address Protected Trees, S
 
 For applications outside the four common ones, open the matching `40.xx.15 Application` section in
 `chapter-40-applications.txt`. Read its **Threshold** (does the proposal qualify?), **Procedure Type**
-(only Type 1 belongs on this desk — if it's Type 2/3/4, say so and recommend routing), **Approval Criteria**
+(only Type 1 is in scope — if it's Type 2/3/4, say so and recommend routing), **Approval Criteria**
 (these tell you which standards in chapters 20/60/70 the submittal must address), and **Submission
 Requirements**. Build the checklist from the criteria + 50.25.1 + the standards those criteria cite.

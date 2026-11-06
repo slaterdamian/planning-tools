@@ -19,12 +19,12 @@ zone it's in, what the applicant must submit, what's missing, and which Developm
 then draft an incompleteness letter. Type 1 = administrative, no public hearing (BDC 50.35).
 
 The full Development Code (chapters 10–70) is bundled in `references/`. It is the source of truth — read it,
-don't guess. The four most common applications on this desk are **Sign Permit, DRCL, SDMHDR1, and LLD**.
+don't guess. The four most common Type 1 applications are **Sign Permit, DRCL, SDMHDR1, and LLD**.
 
-## Two standing facts about this desk
-- **Fees are already paid** before the file arrives. Never list fee payment as a missing completeness item,
+## Two working assumptions
+- **Assumes fees are collected before review.** Don't list fee payment as a missing completeness item,
   even though every city form and approval-criteria list mentions fees.
-- Applications **arrive electronically** (PDF uploads). If files are attached, read them first.
+- **Assumes electronic submittals** (PDF uploads). If files are attached, read them first.
 
 ## Workflow — ask first, then checklist
 
@@ -39,7 +39,7 @@ wasn't given and isn't in the documents, ask for it — sign and design standard
 Match the proposal to a Chapter 40 application (`references/application-types.md`, `references/00-index.md`).
 Open the relevant `40.xx.15` section in `references/chapter-40-applications.txt` and read its **Threshold**,
 **Procedure Type**, **Approval Criteria**, and **Submission Requirements**. If the procedure type is Type 2/3/4,
-say so and recommend routing — it's outside this desk's Type 1 scope.
+say so and recommend routing — it's outside this skill's Type 1 scope.
 
 ### 3. Resolve unclear terms — definition hierarchy
 When unsure what a term means (e.g., "wall sign", "primary building wall", "gross floor area", "hazard tree"),
@@ -61,7 +61,7 @@ standards each worksheet flag pulls in. Then confirm against:
   sections and cite exact subsections.
 Apply the corrections in `references/application-types.md` (signs never need Design Review; no engineer's stamp
 as a planning item; DRCL threshold is 25% GFA / 2,500 sq ft, not an invented 500; no arborist letter or
-fee-in-lieu for landscape removals). These encode real past mistakes — honor them.
+fee-in-lieu for landscape removals). These are known misinterpretations to avoid — honor them.
 
 ### 5. Ask the planner what was actually submitted
 Present the checklist and have the planner indicate, item by item, what the submittal includes. Use the

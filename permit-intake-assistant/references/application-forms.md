@@ -3,7 +3,7 @@
 These checklists are transcribed from the City of Beaverton's own application forms (Planning Division,
 linked from https://beavertonoregon.gov/777/Applications-Fees-Brochures). The city's form IS the submittal
 checklist, so build the planner's checklist from it, then confirm against BDC 50.25.1 and the approval
-criteria. **Fees appear on every form but are already paid before intake — never list fees as missing.**
+criteria. **Fees appear on every form, but this skill assumes they are collected before review — don't list fees as missing.**
 Form links can change; if one 404s, return to the Applications/Fees/Brochures page for the current asset.
 
 ---
@@ -69,7 +69,7 @@ Trees, address 60.60.25.9 in the written statement**.
 Form: "Single-Detached and Middle Housing Design Review Application" (Rev 01/25) · Criteria: BDC 40.21.15.1.C
 
 The form covers Types One/Two/Three — confirm **Type 1** (proposal meets all applicable standards; choosing to
-address a Type 2/3 guideline instead of a standard bumps it to that type, off this desk).
+address a Type 2/3 guideline instead of a standard bumps it to that type, outside this skill's scope).
 
 **Worksheet flags → standards (Chapter 60.05.60 tables by housing type):** new construction in RMA/RMB/RMC/
 CM-RM (20.05.15, 20.22.15/.35, 20.25.05, 20.25.10, 20.30.10; 60.05.60 tables; 60.30; 60.55.15/.25);
@@ -116,4 +116,4 @@ submittal complete per 50.25.1; related approvals sequenced.
 For Adjustment, Conditional Use, Downtown DR/DRCL, Director's Interpretation, Home Occupation, Land Division,
 Loading/Parking Determination, Temporary Use, Tree Plan, Variance, etc., the same page hosts a form. Fetch the
 form, read its **submittal checklist** and **approval-criteria** pages, and confirm the procedure type — only
-Type 1 stays on this desk.
+Type 1 is in scope.
