@@ -1,0 +1,1787 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CDD Form Porter</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: a plan-review desk. The generated form sits left like a clean submittal; the source sheet stays pinned at right with callout boxes on every field that was read. */
+:root {
+  --paper: #EFF2EE; --sheet: #FCFDFB; --ink: #17201C; --ink-2: #56635D; --rule: #C9D2CC; --rule-2: #E1E7E2;
+  --link: #1257A6; --link-wash: #E3EDF9; --redline: #B93425; --redline-wash: #FBE8E4; --good: #2B6B4A; --hatch: #D9E0DB; --pdf: #FFFFFF;
+  --display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Public Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #101513; --sheet: #181F1C; --ink: #E6ECE8; --ink-2: #98A69F; --rule: #35413B; --rule-2: #242D29; --link: #82B9F3; --link-wash: #15283B; --redline: #F08C7E; --redline-wash: #3A1E1A; --good: #7CC79F; --hatch: #2A3430; --pdf: #F4F5F3; color-scheme: dark } }
+:root[data-theme="dark"] { --paper: #101513; --sheet: #181F1C; --ink: #E6ECE8; --ink-2: #98A69F; --rule: #35413B; --rule-2: #242D29; --link: #82B9F3; --link-wash: #15283B; --redline: #F08C7E; --redline-wash: #3A1E1A; --good: #7CC79F; --hatch: #2A3430; --pdf: #F4F5F3; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--paper); color: var(--ink); font: 14px/1.5 var(--body); margin: 0 }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 20px 56px; display: flex; flex-direction: column; gap: 18px }
+button, input, select, textarea { font: inherit; color: inherit }
+button { cursor: pointer }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px }
+.mono { font-family: var(--mono); font-size: 12px }
+.cap { font: 600 11px/1.2 var(--display); letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2) }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: flex-end; justify-content: space-between }
+.top h1 { font: 600 30px/1.05 var(--display); margin: 0; letter-spacing: .005em; text-wrap: balance }
+.top p { margin: 4px 0 0; color: var(--ink-2); max-width: 62ch }
+.open { display: flex; flex-wrap: wrap; align-items: center; gap: 10px }
+.btn { border: 1px solid var(--ink); background: var(--ink); color: var(--sheet); padding: 8px 14px; border-radius: 3px; font-weight: 600 }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule) }
+.btn.small { padding: 4px 10px; font-size: 13px; font-weight: 500 }
+.btn:hover { filter: brightness(1.12) }
+.btn.ghost:hover { border-color: var(--ink); filter: none }
+.demo { font-size: 12.5px; color: var(--ink-2); border: 1px dashed var(--rule); padding: 6px 10px; border-radius: 3px; background: var(--sheet) }
+
+/* title block */
+.tb { background: var(--rule); border: 1.5px solid var(--ink); display: grid; gap: 1px; grid-template-columns: minmax(0, 2.4fr) repeat(5, minmax(0, 1fr)) }
+.tb > div { padding: 9px 12px 10px; background: var(--sheet); min-width: 0 }
+.tb .v { font: 600 24px/1.1 var(--display); font-variant-numeric: tabular-nums; margin-top: 3px }
+.tb .v.name { font-size: 19px; line-height: 1.2; overflow-wrap: anywhere }
+.tb .s { font-size: 12px; color: var(--ink-2); margin-top: 2px; overflow-wrap: anywhere }
+.tb .v.link { color: var(--link) } .tb .v.red { color: var(--redline) }
+.ledger { grid-column: 1 / -1; font-size: 13px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: baseline }
+.ledger b { color: var(--ink); font-variant-numeric: tabular-nums }
+.ledger details { flex-basis: 100% } .ledger summary { cursor: pointer; color: var(--ink-2) } .ledger ul { margin: 6px 0 0; padding-left: 18px }
+
+/* view tabs and toolbar */
+.bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between }
+.seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 3px; overflow: hidden; background: var(--sheet) }
+.seg button { border: 0; background: transparent; padding: 7px 14px; font-weight: 600; border-left: 1px solid var(--rule) }
+.seg button:first-child { border-left: 0 }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--sheet) }
+.seg.small button { padding: 4px 10px; font-size: 13px; font-weight: 500 }
+.tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center }
+.tog { display: inline-flex; gap: 6px; align-items: center; font-size: 13px }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--ink-2); align-items: center }
+.sw { display: inline-block; width: 14px; height: 10px; border: 1.5px solid var(--ink-2); vertical-align: -1px; margin-right: 4px }
+.sw.l { border-color: var(--link); background: var(--link-wash) } .sw.r { border-color: var(--redline); border-style: dashed } .sw.st { background: repeating-linear-gradient(135deg, var(--hatch) 0 3px, transparent 3px 6px) }
+
+/* workspace */
+.work { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start }
+.pane { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 10px); display: flex; flex-direction: column; gap: 10px; max-height: calc(100vh - 20px); overflow: auto }
+.pagebar { display: flex; align-items: center; justify-content: space-between; gap: 8px }
+.sheetwrap { position: relative; background: var(--pdf); border: 1px solid var(--rule); line-height: 0 }
+.sheetwrap canvas { width: 100%; height: auto; display: block }
+.sheetwrap .ph { aspect-ratio: 8.5 / 11; width: 100%; max-width: 100% }
+.box { position: absolute; border: 1.5px solid #6B7772; background: rgba(107, 119, 114, .10); padding: 0; border-radius: 1px; min-width: 6px; min-height: 6px }
+.box.l { border-color: #1257A6; background: rgba(18, 87, 166, .16) }
+.box.r { border-color: #B93425; border-style: dashed; background: rgba(185, 52, 37, .10) }
+.box.st { background: repeating-linear-gradient(135deg, rgba(60, 70, 66, .28) 0 2px, transparent 2px 5px) }
+.box.sel { outline: 3px solid #E0A100; outline-offset: 1px; z-index: 2 }
+.box:hover { outline: 2px solid #17201C; z-index: 3 }
+.sheetwrap { position: relative }
+.how { background: var(--sheet); border: 1px solid var(--rule); padding: 12px 14px; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 5px 12px; font-size: 13px }
+.how h3 { grid-column: 1 / -1; margin: 0 0 2px; font: 600 17px/1.2 var(--display) }
+.how dt { color: var(--ink-2) } .how dd { margin: 0; overflow-wrap: anywhere } .how .flag { color: var(--redline) }
+.how p { grid-column: 1 / -1; margin: 0; color: var(--ink-2) }
+
+/* generated form */
+.formcol { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.notice { background: var(--redline-wash); border: 1px solid var(--redline); padding: 9px 12px; font-size: 13px }
+.notice.calm { background: var(--sheet); border-color: var(--rule); color: var(--ink-2) }
+.sec { background: var(--sheet); border: 1px solid var(--rule); padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.sec > header { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; border-bottom: 1.5px solid var(--ink); padding-bottom: 6px }
+.sec h2 { font: 600 20px/1.15 var(--display); margin: 0; text-wrap: balance }
+.sec .meta { font-size: 12px; color: var(--ink-2) }
+.sec.staffsec { background: repeating-linear-gradient(135deg, var(--hatch) 0 2px, var(--sheet) 2px 9px) }
+.crm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; background: var(--link-wash); border: 1px solid var(--link); padding: 7px 10px }
+.crm select { max-width: 100%; min-width: 0 }
+.grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px 14px }
+.fld { grid-column: span 3; display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 4px 6px; margin: -4px -6px; border-radius: 3px }
+.fld.w2 { grid-column: span 2 } .fld.w6 { grid-column: 1 / -1 }
+.fld.sel { background: color-mix(in srgb, #E0A100 16%, transparent); box-shadow: 0 0 0 1.5px #E0A100 }
+.fld .lab { display: flex; gap: 8px; justify-content: space-between; align-items: baseline }
+.fld label.l, .fld legend { font-weight: 600; font-size: 13.5px; padding: 0 }
+.req { color: var(--redline); font-weight: 500; font-size: 12px; margin-left: 4px }
+.pin { border: 0; background: transparent; color: var(--ink-2); font: 11px var(--mono); padding: 0 2px; white-space: nowrap }
+.pin:hover { color: var(--ink); text-decoration: underline }
+.fld input[type="text"], .fld input[type="email"], .fld input[type="tel"], .fld input[type="number"], .fld input[type="date"], .fld select, .fld textarea, .tbl input {
+  width: 100%; min-width: 0; padding: 7px 9px; border: 1px solid var(--ink-2); border-radius: 2px; background: var(--sheet) }
+.fld textarea { resize: vertical; min-height: 70px }
+.hl .fld.linked input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), .hl .fld.linked select { border-color: var(--link); background: var(--link-wash); box-shadow: inset 3px 0 0 var(--link) }
+.fld input[readonly] { background: var(--rule-2); border-style: dashed }
+.fld input:disabled, .fld select:disabled { background: transparent; border-style: dashed; color: var(--ink-2) }
+.fld [aria-invalid="true"] { border-color: var(--redline) !important; box-shadow: 0 0 0 1px var(--redline) }
+.err { color: var(--redline); font-size: 12.5px }
+.hint { font-size: 12.5px; color: var(--ink-2) }
+.tags { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 1px }
+.tag { font: 500 11px/1.3 var(--mono); padding: 1px 6px; border: 1px solid var(--rule); border-radius: 2px; color: var(--ink-2); background: var(--sheet) }
+.tag.link { border-color: var(--link); color: var(--link); background: var(--link-wash) }
+.tag.rev { border-color: var(--redline); color: var(--redline); border-style: dashed }
+.tag.calc { border-color: var(--good); color: var(--good) }
+body:not(.hl) .tag.link { border-color: var(--rule); color: var(--ink-2); background: var(--sheet) }
+.num { display: flex; gap: 6px; align-items: center } .num input { flex: 1 1 5em } .num select { flex: 0 0 auto; width: auto !important } .num .u { color: var(--ink-2); white-space: nowrap; font-size: 13px }
+.csz { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 1.3fr) minmax(0, 1.6fr); gap: 8px }
+.csz label { font-size: 12px; color: var(--ink-2); display: flex; flex-direction: column; gap: 2px }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0 }
+.opts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 3px }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px } .check input { margin-top: 3px; flex: 0 0 auto }
+.check.strong span { font-weight: 600 }
+.kids { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 0 4px; padding-left: 14px; border-left: 1px solid var(--rule) }
+.up { display: flex; flex-direction: column; gap: 6px; border: 1px dashed var(--ink-2); padding: 10px 12px; border-radius: 2px }
+.up input[type="file"] { max-width: 100%; font-size: 13px }
+.sig { font: italic 500 20px/1.2 "Segoe Script", "Bradley Hand", "Snell Roundhand", cursive !important }
+.note { grid-column: 1 / -1; font-size: 13px; color: var(--ink-2); max-width: 78ch; margin: 0 }
+.note summary, .sec details > summary { cursor: pointer; color: var(--ink) }
+.inst { border: 1px solid var(--rule); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px }
+.inst > header { display: flex; justify-content: space-between; align-items: center; gap: 8px }
+.inst h3 { margin: 0; font: 600 15px/1.2 var(--display); letter-spacing: .02em }
+.tblwrap { grid-column: 1 / -1; overflow-x: auto }
+.tbl { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 13px }
+.tbl th { text-align: left; font-weight: 600; padding: 4px 6px; vertical-align: bottom; border-bottom: 1.5px solid var(--ink) }
+.tbl td, .tbl td.fld { display: table-cell; padding: 4px 6px 4px 0; margin: 0 } .tbl tfoot td { border-top: 1px solid var(--ink); font-weight: 600; padding-top: 8px }
+.tbl .x { border: 0; background: transparent; color: var(--ink-2); padding: 2px 6px }
+.submit { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.pay { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px }
+.pay article { border: 1px solid var(--rule); background: var(--sheet); padding: 10px 12px; min-width: 0 }
+.pay h3 { margin: 0; font: 600 16px/1.2 var(--display) } .pay p { margin: 2px 0 6px; font-size: 12.5px; color: var(--ink-2) }
+pre { margin: 0; font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--rule-2); padding: 10px 12px; max-height: 420px; overflow: auto }
+
+/* field map */
+.mapwrap { overflow-x: auto; background: var(--sheet); border: 1px solid var(--rule) }
+.map { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 13px }
+.map th { position: sticky; top: 0; background: var(--sheet); text-align: left; padding: 8px 10px; border-bottom: 1.5px solid var(--ink); white-space: nowrap }
+.map td { padding: 6px 10px; border-bottom: 1px solid var(--rule-2); vertical-align: top }
+.map tr.sech td { background: var(--rule-2); font: 600 13px var(--display); letter-spacing: .05em; text-transform: uppercase }
+.map tr.cur td { background: color-mix(in srgb, #E0A100 14%, transparent) }
+.map tr.off td { opacity: .5 }
+.map input[type="text"], .map select { width: 100%; padding: 4px 6px; border: 1px solid var(--rule); border-radius: 2px; background: var(--sheet); min-width: 0 }
+.map .why { color: var(--ink-2); max-width: 34ch } .map .flag { color: var(--redline); display: block }
+.schema { display: flex; flex-direction: column; gap: 14px }
+
+/* states */
+.drop { position: fixed; inset: 0; background: color-mix(in srgb, var(--link) 22%, transparent); border: 4px dashed var(--link); display: flex; align-items: center; justify-content: center; font: 600 26px var(--display); z-index: 20; pointer-events: none }
+.status { background: var(--sheet); border: 1px solid var(--rule); padding: 28px 20px; text-align: center; color: var(--ink-2) }
+.status b { color: var(--ink); font: 600 20px var(--display); display: block; margin-bottom: 4px }
+
+@media (max-width: 980px) {
+  .work { grid-template-columns: minmax(0, 1fr) }
+  .pane { position: static; max-height: none; order: -1 }
+  .tb { grid-template-columns: repeat(3, minmax(0, 1fr)) } .tb > div:first-child { grid-column: 1 / -1 } .tb > div:nth-child(6) { grid-column: span 2 }
+}
+@media (max-width: 620px) {
+  .wrap { padding-inline: 16px }
+  .fld, .fld.w2 { grid-column: 1 / -1 }
+  .csz { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) } .csz label:first-child { grid-column: 1 / -1 }
+  .top h1 { font-size: 26px }
+  .sec { padding: 14px }
+}
+@media (prefers-reduced-motion: no-preference) { .fld.sel { transition: background .2s } }
+
+</style>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>CDD Form Porter</h1>
+      <p>Reads a Community Development application PDF, works out what each blank is asking for, and rebuilds it as a web form. Fields that an existing system already holds are marked.</p>
+    </div>
+    <div class="open">
+      <span class="demo">Prototype. Nothing is sent or saved.</span>
+      <input type="file" id="file" accept="application/pdf,.pdf" hidden>
+      <button class="btn" id="pick" type="button">Open a PDF</button>
+    </div>
+  </header>
+  <div id="tb"></div>
+  <div class="bar" id="bar" hidden>
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" id="t-form" aria-pressed="true">Web form</button>
+      <button type="button" id="t-map" aria-pressed="false">Field map</button>
+      <button type="button" id="t-schema" aria-pressed="false">Schema</button>
+    </div>
+    <div class="tools" id="formtools">
+      <div class="seg small" role="group" aria-label="Audience">
+        <button type="button" id="a-app" aria-pressed="true">Applicant</button>
+        <button type="button" id="a-staff" aria-pressed="false">Staff</button>
+      </div>
+      <label class="tog"><input type="checkbox" id="hl" checked> Mark system-linked fields</label>
+      <button class="btn ghost small" id="fill" type="button">Fill with example data</button>
+      <span class="hint" id="exnote" hidden>Example values, not real records.</span>
+    </div>
+  </div>
+  <div id="views" hidden>
+    <div id="v-form" class="work">
+      <div class="formcol" id="form"></div>
+      <aside class="pane" id="pane" aria-label="Source PDF"></aside>
+    </div>
+    <div id="v-map" hidden></div>
+    <div id="v-schema" hidden></div>
+  </div>
+  <div id="status" class="status" role="status"></div>
+</div>
+<div class="drop" id="drop" hidden>Drop the PDF to convert it</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script>
+/* PDF application -> web form model.  Pure functions over pdf.js page data; no DOM. */
+(function (root) {
+  'use strict';
+
+  var PUA = /[-]/g;
+  var BOX_ONLY = /^[-☐-☒□▢◻◽❏-❒○◯⬜]+$/;
+  var UNIT_RE = /^(?:ft|feet|foot|sq\.?\s*ft|s\.?f|square\s+f(?:ee|oo)t|in|inch(?:es)?|%|percent|acres?|ac|lf|lin(?:eal|ear)?\s*f(?:ee)?t|units?|stories|spaces?|years?|yrs?|days?|months?|hours?|hrs?|sq\.?\s*in|mph|gal(?:lons)?|lbs?)\.?$/i;
+  var SMALL = { of: 1, or: 1, and: 1, the: 1, 'in': 1, on: 1, to: 1, 'for': 1, a: 1, an: 1, 'if': 1, at: 1, by: 1, per: 1, 'with': 1, from: 1 };
+  var ACRO = { ZIP: 1, EMC: 1, ROW: 1, ID: 1, PO: 1, LLC: 1, DBA: 1, CCB: 1, GIS: 1, BDC: 1, ADA: 1, HOA: 1, USA: 1, 'N/A': 1, II: 1, III: 1, SF: 1, UGB: 1, ADU: 1, PUD: 1, CUP: 1, DR: 1 };
+
+  function norm(s) { return String(s || '').replace(/\s+/g, ' ').trim(); }
+  function clean(s) { return norm(String(s || '').replace(PUA, ' ').replace(/_+/g, ' ')).replace(/\s*[:：]+\s*$/, '').trim(); }
+  function upperRatio(s) { var L = s.replace(/[^A-Za-z]/g, ''); if (!L.length) return 0; return L.replace(/[^A-Z]/g, '').length / L.length; }
+  function titleCase(s) {
+    if (upperRatio(s) < 0.5 || s.replace(/[^A-Za-z]/g, '').length < 2) return s;
+    var first = true;
+    return s.split(/(\s+|\/|-)/).map(function (w) {
+      var bare = w.replace(/[^A-Za-z]/g, '');
+      if (!bare) return w;
+      if (bare !== bare.toUpperCase()) { first = false; return w; }
+      if (ACRO[bare] || (bare.length >= 2 && bare.length <= 6 && !/[AEIOUY]/.test(bare))) { first = false; return w; }
+      var lw = w.toLowerCase();
+      if (!first && SMALL[lw.replace(/[^a-z]/g, '')]) return lw;
+      first = false;
+      return lw.replace(/[a-z]/, function (c) { return c.toUpperCase(); });
+    }).join('').replace(/([A-Za-z])-([A-Z])([a-z]+)/g, function (m, p, a, b) { return p + '-' + a.toLowerCase() + b; });
+  }
+  function sentence(s) {
+    if (upperRatio(s) < 0.8) return s;
+    var first = true;
+    return s.split(/(\s+)/).map(function (w) {
+      var bare = w.replace(/[^A-Za-z]/g, ''); if (!bare) return w;
+      if (ACRO[bare]) { first = false; return w; }
+      var lw = w.toLowerCase(); if (first) { first = false; return lw.replace(/[a-z]/, function (c) { return c.toUpperCase(); }); }
+      return lw;
+    }).join('');
+  }
+  function slug(s) { return norm(s).toLowerCase().replace(/\(s\)/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'field'; }
+  function cw(ch) {
+    if (ch === ' ') return 0.5; if (ch === '_') return 1;
+    if (/[A-Z]/.test(ch)) return /[IJ]/.test(ch) ? 0.6 : /[MW]/.test(ch) ? 1.6 : 1.22;
+    if (/[a-z]/.test(ch)) return /[iljtfr]/.test(ch) ? 0.5 : /[mw]/.test(ch) ? 1.45 : 0.97;
+    if (/[0-9]/.test(ch)) return 1; if (/[.,:;'!|()]/.test(ch)) return 0.55; return 1;
+  }
+  function sw(s) { var t = 0; for (var i = 0; i < s.length; i++) t += cw(s[i]); return t; }
+  function ov(a1, a2, b1, b2) { return Math.min(a2, b2) - Math.max(a1, b1); }
+  function median(a) { if (!a.length) return 10; var b = a.slice().sort(function (x, y) { return x - y; }); return b[Math.floor(b.length / 2)]; }
+
+  /* ---------- 1. paint analysis: which fills cover earlier text, thin rules, small boxes ---------- */
+  function mul(m, n) { return [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]]; }
+  function ap(m, x, y) { return [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]]; }
+  function paintInfo(ol, OPS) {
+    var out = { whites: [], rules: [], boxes: [] };
+    if (!ol || !OPS) return out;
+    var ctm = [1, 0, 0, 1, 0, 0], st = [], fill = [0, 0, 0], chars = 0, path = null, gs = { a: 1, bm: '' };
+    for (var i = 0; i < ol.fnArray.length; i++) {
+      var fn = ol.fnArray[i], a = ol.argsArray[i];
+      if (fn === OPS.save) st.push([ctm, fill, gs]);
+      else if (fn === OPS.restore) { var s = st.pop(); if (s) { ctm = s[0]; fill = s[1]; gs = s[2]; } }
+      else if (fn === OPS.setGState) { gs = { a: gs.a, bm: gs.bm }; (a[0] || []).forEach(function (kv) { if (kv[0] === 'ca') gs.a = kv[1]; if (kv[0] === 'BM') gs.bm = String(kv[1] || ''); }); }
+      else if (fn === OPS.transform) ctm = mul(ctm, a);
+      else if (fn === OPS.paintFormXObjectBegin) { st.push([ctm, fill, gs]); if (a && a[0]) ctm = mul(ctm, a[0]); }
+      else if (fn === OPS.paintFormXObjectEnd) { var s2 = st.pop(); if (s2) { ctm = s2[0]; fill = s2[1]; gs = s2[2]; } }
+      else if (fn === OPS.setFillRGBColor) fill = [a[0], a[1], a[2]];
+      else if (fn === OPS.constructPath) {
+        var mm = a[2];
+        if (mm && isFinite(mm[0])) {
+          var c = [ap(ctm, mm[0], mm[2]), ap(ctm, mm[1], mm[3]), ap(ctm, mm[0], mm[3]), ap(ctm, mm[1], mm[2])];
+          var xs = c.map(function (q) { return q[0]; }), ys = c.map(function (q) { return q[1]; });
+          path = { x1: Math.min.apply(0, xs), x2: Math.max.apply(0, xs), y1: Math.min.apply(0, ys), y2: Math.max.apply(0, ys) };
+        }
+      } else if (fn === OPS.fill || fn === OPS.eoFill || fn === OPS.fillStroke || fn === OPS.eoFillStroke || fn === OPS.closeFillStroke || fn === OPS.closeEOFillStroke || fn === OPS.stroke || fn === OPS.closeStroke) {
+        if (path) {
+          var w = path.x2 - path.x1, h = path.y2 - path.y1, stroked = (fn === OPS.stroke || fn === OPS.closeStroke || fn === OPS.fillStroke || fn === OPS.eoFillStroke);
+          var white = fill[0] >= 250 && fill[1] >= 250 && fill[2] >= 250, opaque = gs.a >= 0.99 && (!gs.bm || /normal|source-over/i.test(gs.bm));
+          if (fn !== OPS.stroke && fn !== OPS.closeStroke && white && opaque && w >= 4 && h >= 4) out.whites.push({ x1: path.x1, x2: path.x2, y1: path.y1, y2: path.y2, chars: chars });
+          if (h <= 1.8 && w >= 18 && (stroked || !white)) out.rules.push({ x1: path.x1, x2: path.x2, y: (path.y1 + path.y2) / 2 });
+          if (stroked && w >= 5 && w <= 18 && h >= 5 && h <= 18 && Math.abs(w - h) <= 3) out.boxes.push({ x1: path.x1, x2: path.x2, y1: path.y1, y2: path.y2 });
+        }
+        path = null;
+      } else if (fn === OPS.endPath) path = null;
+      else if (fn === OPS.showText) {
+        var g = a[0];
+        for (var k = 0; k < g.length; k++) if (g[k] && typeof g[k] === 'object' && g[k].unicode) chars += g[k].unicode.replace(/\s/g, '').length;
+      }
+    }
+    return out;
+  }
+
+  /* ---------- 2. tokens, lines, runs ---------- */
+  function tokenize(items, paint, issues, pageNum) {
+    var toks = [], count = 0;
+    items.forEach(function (it) {
+      var s = it.str; if (!s) return;
+      var n = s.replace(/\s/g, '').length, c0 = count; count += n;
+      if (!s.trim()) return;
+      var t = it.transform; if (Math.abs(t[1]) > 0.01 || Math.abs(t[2]) > 0.01) return;
+      var h = it.height || Math.abs(t[3]) || 10, x = t[4], y = t[5], W = it.width || 0;
+      if (W <= 0) return;
+      var parts = s.split(/(_{2,}|[-☐-☒□▢❏-❒]+)/).filter(function (p) { return p.length; });
+      var tot = sw(s) || 1, acc = 0;
+      parts.forEach(function (p) {
+        var a0 = acc; acc += sw(p);
+        if (!p.trim()) return;
+        if (!p.replace(/[\s_]/g, '') && !/_{2,}/.test(p)) return;
+        var isB = /^[_\s]+$/.test(p), lead = sw(p.match(isB ? /^\s*/ : /^[\s_]*/)[0]), trail = sw(p.match(isB ? /\s*$/ : /[\s_]*$/)[0]);
+        var tk = { s: isB ? p.trim() : p.replace(/^[\s_]+|[\s_]+$/g, ''), x1: x + W * (a0 + lead) / tot, x2: x + W * (acc - trail) / tot, y: y, h: h, c1: c0 + n, est: parts.length > 1 };
+        tk.t = /^_+$/.test(tk.s) ? 'blank' : BOX_ONLY.test(tk.s) ? 'box' : 'text';
+        toks.push(tk);
+      });
+    });
+    // text painted before an opaque white fill that covers it is not visible on the page
+    var res = [];
+    toks.forEach(function (tk) {
+      var pieces = [tk];
+      paint.whites.forEach(function (F) {
+        if (F.chars < tk.c1 - 1) return;
+        var next = [];
+        pieces.forEach(function (p) {
+          var b1 = p.y - 0.15 * p.h, b2 = p.y + 0.7 * p.h;
+          if (ov(b1, b2, F.y1, F.y2) < 0.6 * (b2 - b1)) { next.push(p); return; }
+          var a = Math.max(p.x1, F.x1), b = Math.min(p.x2, F.x2), w = p.x2 - p.x1;
+          if (b - a < 3) { next.push(p); return; }
+          if (b - a >= 0.9 * w || p.t !== 'text') { issues.push({ page: pageNum, kind: 'covered', text: p.s }); return; }
+          var tot = sw(p.s), cut = function (xx) { var target = (xx - p.x1) / w * tot, acc = 0, best = 0, bd = 1e9; for (var i = 0; i <= p.s.length; i++) { if (Math.abs(acc - target) < bd) { bd = Math.abs(acc - target); best = i; } if (i < p.s.length) acc += cw(p.s[i]); } return best; };
+          var edge = function (i) { return i <= 0 || i >= p.s.length || p.s[i] === ' ' || p.s[i - 1] === ' '; };
+          var snap = function (i) { for (var d = 0; d <= 3; d++) { if (edge(i - d)) return Math.max(0, i - d); if (edge(i + d)) return Math.min(p.s.length, i + d); } return i; };
+          var i1 = snap(cut(a)), i2 = snap(cut(b));
+          var left = p.s.slice(0, i1).trim(), right = p.s.slice(i2).trim();
+          if (p.s.slice(i1, i2).trim()) issues.push({ page: pageNum, kind: 'covered', text: p.s.slice(i1, i2).trim() });
+          if (left) next.push({ s: left, x1: p.x1, x2: Math.min(a, p.x1 + w * sw(left) / tot), y: p.y, h: p.h, c1: p.c1, est: true, t: 'text' });
+          if (right) next.push({ s: right, x1: Math.max(b, p.x2 - w * sw(right) / tot), x2: p.x2, y: p.y, h: p.h, c1: p.c1, est: true, t: 'text' });
+        });
+        pieces = next;
+      });
+      res = res.concat(pieces);
+    });
+    // single characters stacked in a column (rotated or clipped margin text) are not labels
+    var col = {};
+    res.forEach(function (tk) { if (tk.t === 'text' && tk.s.length <= 1) { var k = Math.round(tk.x1 / 3); (col[k] = col[k] || []).push(tk); } });
+    Object.keys(col).forEach(function (k) { if (col[k].length >= 6) col[k].forEach(function (tk) { tk.drop = true; }); });
+    return res.filter(function (tk) { return !tk.drop; });
+  }
+
+  function buildRuns(toks) {
+    var sorted = toks.slice().sort(function (a, b) { return b.y - a.y || a.x1 - b.x1; });
+    var lines = [];
+    sorted.forEach(function (tk) {
+      var L = lines.length ? lines[lines.length - 1] : null;
+      var tol = Math.min(3.5, Math.max(2, 0.3 * tk.h));
+      if (L && Math.abs(L.y - tk.y) <= tol) L.toks.push(tk); else lines.push({ y: tk.y, toks: [tk] });
+    });
+    var runs = [], blanks = [], boxes = [];
+    lines.forEach(function (L, li) {
+      L.toks.sort(function (a, b) { return a.x1 - b.x1; });
+      var cur = null;
+      L.toks.forEach(function (tk) {
+        if (tk.t !== 'text') { (tk.t === 'blank' ? blanks : boxes).push({ x1: tk.x1, x2: tk.x2, y: tk.y, h: tk.h, line: li }); cur = null; return; }
+        var gap = cur ? tk.x1 - cur.x2 : 1e9;
+        if (cur && gap < -2.5 && tk.x1 < cur.x2 - 0.25 * (tk.x2 - tk.x1)) { runs.push({ s: tk.s, x1: tk.x1, x2: tk.x2, y: tk.y, h: tk.h, line: li, overlay: true, role: 'overlay' }); return; }
+        if (cur && gap <= Math.max(3.2, 0.5 * Math.min(cur.h, tk.h))) {
+          var sp = gap > 0.15 * tk.h && !/[\s(\-\/]$/.test(cur.s) && !/^[\s,.:;)\-\/]/.test(tk.s);
+          cur.s += (sp ? ' ' : '') + tk.s; cur.x2 = Math.max(cur.x2, tk.x2); cur.h = Math.max(cur.h, tk.h); cur.est = cur.est || tk.est;
+        } else { cur = { s: tk.s, x1: tk.x1, x2: tk.x2, y: tk.y, h: tk.h, line: li, est: tk.est, role: null }; runs.push(cur); }
+      });
+    });
+    runs.forEach(function (r) { r.s = norm(r.s); });
+    return { runs: runs.filter(function (r) { return r.s.length; }), blanks: blanks, boxes: boxes, nLines: lines.length };
+  }
+
+  async function readPage(page, lib, num, issues) {
+    var vp = page.getViewport({ scale: 1 });
+    var tc = await page.getTextContent();
+    var ann = await page.getAnnotations();
+    var ol = null; try { ol = await page.getOperatorList({ annotationMode: 0 }); } catch (e) { ol = null; }
+    var paint = paintInfo(ol, lib && lib.OPS);
+    var pg = { num: num, w: vp.width, h: vp.height, paint: paint, widgets: [], headings: [], notes: [], tables: [] };
+    var rr = buildRuns(tokenize(tc.items, paint, issues, num));
+    pg.runs = rr.runs; pg.blanks = rr.blanks; pg.boxGlyphs = rr.boxes; pg.textChars = tc.items.reduce(function (n, it) { return n + it.str.replace(/\s/g, '').length; }, 0);
+    var i = 0;
+    ann.forEach(function (a) {
+      if (a.subtype !== 'Widget' || a.hidden || a.pushButton || !a.rect) return;
+      var r = a.rect, kind = a.fieldType === 'Tx' ? 'text' : a.fieldType === 'Ch' ? 'choice' : a.fieldType === 'Sig' ? 'signature' : a.checkBox ? 'checkbox' : a.radioButton ? 'radio' : 'text';
+      pg.widgets.push({
+        id: 'p' + num + 'w' + (i++), page: num, kind: kind, name: a.fieldName || '', alt: norm(a.alternativeText || ''),
+        x1: Math.min(r[0], r[2]), y1: Math.min(r[1], r[3]), x2: Math.max(r[0], r[2]), y2: Math.max(r[1], r[3]),
+        multiLine: !!a.multiLine, maxLen: a.maxLen || 0, required: !!a.required, readOnly: !!a.readOnly,
+        options: (a.options || []).map(function (o) { return norm(o.displayValue || o.exportValue || ''); }).filter(Boolean),
+        value: a.buttonValue || a.exportValue || '', actions: a.actions || null, src: 'acroform'
+      });
+    });
+    return pg;
+  }
+
+  /* ---------- 3. pages without fillable fields: infer fields from layout ---------- */
+  function synthesize(pg, issues) {
+    var i = 0, add = function (k, x1, y1, x2, y2) { pg.widgets.push({ id: 'p' + pg.num + 's' + (i++), page: pg.num, kind: k, name: '', alt: '', x1: x1, y1: y1, x2: x2, y2: y2, options: [], src: 'layout' }); };
+    var right = Math.max.apply(0, pg.runs.map(function (r) { return r.x2; }).concat([pg.w * 0.6]));
+    var hit = function (x1, y1, x2, y2) { return pg.widgets.some(function (w) { return ov(w.x1, w.x2, x1, x2) > 2 && ov(w.y1, w.y2, y1, y2) > 2; }); };
+    var boxLeft = function (r) { return pg.boxGlyphs.concat(pg.paint.boxes.map(function (b) { return { x1: b.x1, x2: b.x2, y: b.y1 + 1 }; })).some(function (b) { return Math.abs(b.y - r.y) < 5 && b.x2 <= r.x1 + 3 && r.x1 - b.x2 < 26; }); };
+    // printed underscores
+    var bl = pg.blanks.slice().sort(function (a, b) { return b.y - a.y || a.x1 - b.x1; }), merged = [];
+    bl.forEach(function (b) { var p = merged[merged.length - 1]; if (p && Math.abs(p.y - b.y) < 2 && b.x1 - p.x2 <= 4) p.x2 = b.x2; else merged.push({ x1: b.x1, x2: b.x2, y: b.y, h: b.h }); });
+    merged.forEach(function (b) { if (b.x2 - b.x1 >= 12) add('text', b.x1, b.y - 2, b.x2, b.y + b.h * 0.9); });
+    // box glyphs and small drawn squares
+    pg.boxGlyphs.forEach(function (b) { add('checkbox', b.x1, b.y - 1, b.x2, b.y + b.h * 0.75); });
+    pg.paint.boxes.forEach(function (b) { if (!hit(b.x1, b.y1, b.x2, b.y2)) add('checkbox', b.x1, b.y1, b.x2, b.y2); });
+    // drawn underlines
+    var rules = pg.paint.rules, grid = 0;
+    rules.forEach(function (l) {
+      if (l.x2 - l.x1 > 0.8 * pg.w) return;
+      var twins = rules.filter(function (m) { return m !== l && Math.abs(m.x1 - l.x1) <= 2 && Math.abs(m.x2 - l.x2) <= 2; });
+      if (twins.some(function (m) { return Math.abs(m.y - l.y) <= 3; })) return;
+      if (twins.length >= 3) { grid++; return; }
+      var texted = pg.runs.some(function (r) { return r.y >= l.y - 1 && r.y <= l.y + 5 && ov(r.x1, r.x2, l.x1, l.x2) > 0.3 * (l.x2 - l.x1); });
+      var labelled = pg.runs.some(function (r) { return r.y >= l.y - 2 && r.y <= l.y + 7 && r.x2 <= l.x1 + 6 && l.x1 - r.x2 < 40; });
+      var caption = !twins.length && pg.runs.some(function (r) { return r.y < l.y - 2 && r.y > l.y - 16 && ov(r.x1, r.x2, l.x1, l.x2) > 0.6 * (r.x2 - r.x1) && r.s.length < 40 && !(upperRatio(r.s) >= 0.85 && r.s.split(/\s+/).length >= 3); });
+      if (!texted && (labelled || caption) && !hit(l.x1, l.y, l.x2, l.y + 11)) add('text', l.x1, l.y, l.x2, l.y + 11);
+    });
+    if (grid >= 6) issues.push({ page: pg.num, kind: 'grid', text: 'A ruled table on this page has no fillable cells; its rows were not carried over.' });
+    // a label ending in a colon with open space after it
+    pg.runs.forEach(function (r) {
+      if (!/[:：]\s*$/.test(r.s) || r.s.length > 60 || boxLeft(r) || /\b(check|select|choose|circle|mark)\b/i.test(r.s)) return;
+      var nx = pg.runs.filter(function (q) { return q !== r && q.line === r.line && q.x1 > r.x2; }).sort(function (a, b) { return a.x1 - b.x1; })[0];
+      var end = nx ? nx.x1 - 6 : right;
+      if (end - r.x2 >= 40 && !hit(r.x2 + 3, r.y - 2, end, r.y + r.h * 0.9)) add('text', r.x2 + 3, r.y - 2, end, r.y + r.h * 0.9);
+    });
+  }
+
+  /* ---------- 4. geometry helpers ---------- */
+  function band(r) { return [r.y - 0.25 * r.h, r.y + 0.8 * r.h]; }
+  function onLine(r, w) { var b = band(r), o = ov(b[0], b[1], w.y1, w.y2); return o >= 0.4 * Math.min(b[1] - b[0], w.y2 - w.y1); }
+  function wSameLine(a, b) { return ov(a.y1, a.y2, b.y1, b.y2) >= 0.5 * Math.min(a.y2 - a.y1, b.y2 - b.y1); }
+  function prevWidget(pg, w) {
+    var best = null;
+    pg.widgets.forEach(function (u) { if (u !== w && wSameLine(u, w) && u.x2 <= w.x1 + 2 && (!best || u.x2 > best.x2)) best = u; });
+    return best;
+  }
+  function nextWidget(pg, w) {
+    var best = null;
+    pg.widgets.forEach(function (u) { if (u !== w && wSameLine(u, w) && u.x1 >= w.x2 - 2 && (!best || u.x1 < best.x1)) best = u; });
+    return best;
+  }
+  function aboveRuns(pg, x1, x2, yTop, maxGap, allowHead) {
+    var c = pg.runs.filter(function (r) {
+      if (r.role || r.y < yTop - 1 || r.y - yTop > 110) return false;
+      var o = ov(r.x1, r.x2, x1 - 4, x2 + 4);
+      return o >= 0.5 * (r.x2 - r.x1) || (o >= 0.7 * (x2 - x1) && (r.x2 - r.x1) < 2.2 * (x2 - x1 + 8));
+    }).sort(function (a, b) { return a.y - b.y; });
+    var out = [];
+    for (var i = 0; i < c.length; i++) {
+      var r = c[i];
+      if (!out.length) { if (r.y - yTop > maxGap) break; out.push(r); continue; }
+      var p = out[out.length - 1];
+      if (Math.abs(r.y - p.y) < 1.5) { out.push(r); continue; }
+      if (r.y - p.y > 1.9 * p.h || r.h > 1.3 * p.h) break;
+      out.push(r);
+    }
+    out.sort(function (a, b) { return b.y - a.y || a.x1 - b.x1; });
+    return out;
+  }
+
+  /* ---------- 5. grids of unlabeled text fields become tables ---------- */
+  function detectTables(pg) {
+    var tx = pg.widgets.filter(function (w) { return w.kind === 'text' && (w.y2 - w.y1) < 30; });
+    var cols = [];
+    tx.forEach(function (w) {
+      var c = cols.filter(function (c) { return Math.abs(c.x1 - w.x1) <= 3.5 && Math.abs(c.x2 - w.x2) <= 3.5; })[0];
+      if (!c) { c = { x1: w.x1, x2: w.x2, cells: [] }; cols.push(c); }
+      c.cells.push(w);
+    });
+    var stacks = [];
+    cols.forEach(function (c) {
+      c.cells.sort(function (a, b) { return b.y1 - a.y1; });
+      if (c.cells.length < 3) return;
+      var gaps = []; for (var i = 1; i < c.cells.length; i++) gaps.push(c.cells[i - 1].y1 - c.cells[i].y1);
+      var pitch = median(gaps), cur = [c.cells[0]];
+      for (var j = 1; j < c.cells.length; j++) {
+        var g = c.cells[j - 1].y1 - c.cells[j].y1;
+        if (g <= 1.9 * pitch && pitch <= 36) cur.push(c.cells[j]); else { if (cur.length >= 3) stacks.push({ x1: c.x1, x2: c.x2, cells: cur, pitch: pitch }); cur = [c.cells[j]]; }
+      }
+      if (cur.length >= 3) stacks.push({ x1: c.x1, x2: c.x2, cells: cur, pitch: pitch });
+    });
+    stacks = stacks.filter(function (s) {
+      var lab = s.cells.filter(function (w) {
+        var p = prevWidget(pg, w);
+        return pg.runs.some(function (r) { return onLine(r, w) && r.x2 <= w.x1 + 4 && w.x1 - r.x2 < 120 && (!p || r.x1 >= p.x2 - 2); });
+      }).length;
+      return lab <= 0.2 * s.cells.length;
+    });
+    var used = [];
+    stacks.sort(function (a, b) { return a.x1 - b.x1; });
+    stacks.forEach(function (s) {
+      if (used.indexOf(s) >= 0) return;
+      var grp = stacks.filter(function (t) { return used.indexOf(t) < 0 && Math.abs(t.cells[0].y1 - s.cells[0].y1) <= 6 && Math.abs(t.cells.length - s.cells.length) <= 2; });
+      grp.forEach(function (t) { used.push(t); });
+      var tb = { id: 'p' + pg.num + 't' + pg.tables.length, page: pg.num, cols: grp, rows: Math.max.apply(0, grp.map(function (g) { return g.cells.length; })), totals: [] };
+      tb.x1 = grp[0].x1; tb.x2 = grp[grp.length - 1].x2; tb.yTop = Math.max.apply(0, grp.map(function (g) { return g.cells[0].y2; }));
+      tb.yBot = Math.min.apply(0, grp.map(function (g) { return g.cells[g.cells.length - 1].y1; }));
+      grp.forEach(function (g, ci) {
+        g.cells.forEach(function (w, ri) { w.table = tb; w.col = ci; w.row = ri; });
+        var hr = aboveRuns(pg, g.x1, g.x2, g.cells[0].y2, 48);
+        hr.forEach(function (r) { r.role = 'colhead'; });
+        g.head = norm(hr.map(function (r) { return r.s; }).join(' '));
+      });
+      var pitch = grp[0].pitch;
+      pg.widgets.forEach(function (w) {
+        if (w.table || w.kind !== 'text' || w.y2 > tb.yBot + 2 || tb.yBot - w.y2 > 2.6 * pitch) return;
+        var xc = (w.x1 + w.x2) / 2;
+        grp.forEach(function (g, ci) { if (xc >= g.x1 - 6 && xc <= g.x2 + 6) { w.totalOf = { table: tb, col: ci }; tb.totals.push(w); } });
+      });
+      pg.tables.push(tb);
+    });
+  }
+
+  /* ---------- 6. labels ---------- */
+  function labelPage(pg) {
+    var body0 = median(pg.runs.filter(function (r) { return r.s.length >= 3; }).map(function (r) { return r.h; }));
+    var texty = pg.widgets.filter(function (w) { return w.kind !== 'checkbox' && w.kind !== 'radio' && !w.table; });
+    var checks = pg.widgets.filter(function (w) { return w.kind === 'checkbox' || w.kind === 'radio'; });
+    // 6a unit printed right after the blank
+    pg.widgets.forEach(function (w) {
+      if (w.kind === 'checkbox' || w.kind === 'radio') return;
+      var best = null;
+      pg.runs.forEach(function (r) { if (!r.role && onLine(r, w) && r.x1 >= w.x2 - 4 && r.x1 <= w.x2 + 9 && UNIT_RE.test(r.s.replace(/[()]/g, '').trim()) && (!best || r.x1 < best.x1)) best = r; });
+      if (best) { best.role = 'unit'; w.unit = best.s.replace(/[()]/g, '').trim(); }
+    });
+    // 6b label printed to the left on the same line
+    texty.forEach(function (w) {
+      var P = prevWidget(pg, w);
+      var c = pg.runs.filter(function (r) {
+        if (r.role && r.role !== 'label') return false;
+        if (r.role === 'label') return false;
+        if (!onLine(r, w) || r.x1 >= w.x1 - 4) return false;
+        if (P && r.x1 < P.x2 - 8) return false;
+        if (r.x2 > w.x1 + Math.max(8, r.est ? 0.18 * (r.x2 - r.x1) : 0)) return false;
+        if (P && (P.kind === 'checkbox' || P.kind === 'radio') && r.x1 - P.x2 <= 22 && w.x1 - r.x2 > (/[:：]\s*$/.test(r.s) ? 60 : 14)) return false;
+        return true;
+      }).sort(function (a, b) { return b.x2 - a.x2; });
+      if (!c.length) return;
+      var L = c[0], gap = w.x1 - L.x2;
+      if (gap > (/[:：#?]\s*$/.test(L.s) ? 240 : 110)) return;
+      L.role = 'label'; L.owner = w; w.labelRun = L; w.label = L.s; w.why = 'text printed to the left of the field';
+      var pre = c.slice(1).filter(function (r) { return r.x2 <= L.x1 + 1 && L.x1 - r.x2 <= 26 && /[:：]\s*$/.test(r.s); })[0];
+      if (pre) { pre.role = 'prefix'; w.prefix = clean(pre.s); }
+      else if (P && P.prefix && P.kind === 'text' && L.x1 - P.x2 <= 26) w.prefix = P.prefix;
+    });
+    // 6c checkbox label printed to the right (and wrapped lines under it)
+    checks.forEach(function (cb) {
+      var N = nextWidget(pg, cb);
+      var c = pg.runs.filter(function (r) { return onLine(r, cb) && r.x1 >= cb.x2 - 2.5 && r.x1 <= cb.x2 + 24 && r.role !== 'unit' && r.role !== 'overlay' && r.role !== 'colhead'; }).sort(function (a, b) { return a.x1 - b.x1; });
+      if (!c.length) return;
+      var first = c[0];
+      if (first.role === 'label' && first.owner && first.owner.kind !== 'checkbox') { cb.absorbedBy = first.owner; return; }
+      if (first.role) return;
+      var chain = [first], lim = N ? N.x1 - 2 : 1e9;
+      pg.runs.filter(function (r) { return r.line === first.line && r.x1 > first.x1 && !r.role; }).sort(function (a, b) { return a.x1 - b.x1; }).forEach(function (r) {
+        var p = chain[chain.length - 1];
+        if (r.x1 - p.x2 <= 1.3 * p.h && r.x1 < lim) chain.push(r);
+      });
+      var lastY = first.y, lx = first.x1, more = true;
+      while (more) {
+        more = false;
+        var cand = pg.runs.filter(function (r) { return !r.role && r.y < lastY - 2 && lastY - r.y <= 1.55 * first.h && Math.abs(r.x1 - lx) <= 4; }).sort(function (a, b) { return b.y - a.y; })[0];
+        if (!cand) break;
+        var blocked = pg.widgets.some(function (u) { return (u.kind === 'checkbox' || u.kind === 'radio') && onLine(cand, u) && u.x2 <= cand.x1 + 3 && cand.x1 - u.x2 < 30; }) ||
+          pg.boxGlyphs.some(function (b) { return Math.abs(b.y - cand.y) < 3 && b.x2 <= cand.x1 + 3 && cand.x1 - b.x2 < 30; });
+        if (blocked) break;
+        var row = pg.runs.filter(function (r) { return !r.role && Math.abs(r.y - cand.y) < 2 && r.x1 >= cand.x1 - 1; }).sort(function (a, b) { return a.x1 - b.x1; });
+        var ok = true; row.forEach(function (r, i) { if (i && r.x1 - row[i - 1].x2 > 1.6 * r.h) ok = false; if (ok) chain.push(r); });
+        lastY = cand.y; more = true;
+      }
+      chain.forEach(function (r) { r.role = 'label'; r.owner = cb; });
+      cb.labelRuns = chain; cb.label = norm(chain.map(function (r) { return r.s; }).join(' ')); cb.lx = first.x1; cb.why = 'text printed to the right of the checkbox';
+    });
+    // 6d label printed above the field, or a caption under it, whichever sits closer
+    texty.forEach(function (w) {
+      if (w.label) return;
+      var hr = aboveRuns(pg, w.x1, w.x2, w.y2, 42);
+      var below = pg.runs.filter(function (r) { return !r.role && r.y < w.y1 && r.y >= w.y1 - 16 && ov(r.x1, r.x2, w.x1 - 4, w.x2 + 4) >= 0.5 * (r.x2 - r.x1) && r.s.length < 50 && !/^\(/.test(r.s) && r.h <= 1.15 * body0; }).sort(function (a, b) { return b.y - a.y; })[0];
+      var near = hr[hr.length - 1], gA = near ? near.y - w.y2 : 1e9, gB = below ? w.y1 - (below.y + 0.75 * below.h) : 1e9;
+      if (below && gB < gA) { below.role = 'label'; below.owner = w; w.label = below.s; w.labelRun = below; w.why = 'caption printed under the field'; return; }
+      if (!hr.length) return;
+      if (hr.some(function (r) { return r.h >= 13.5 && (r.x2 - r.x1) > 2 * (w.x2 - w.x1); })) return;
+      if (upperRatio(near.s) >= 0.85 && !/[:：]\s*$/.test(near.s) && gA > 14 && near.s.replace(/[^A-Za-z]/g, '').length >= 5) return;
+      hr.forEach(function (r) { r.role = 'label'; r.owner = w; });
+      w.label = norm(hr.map(function (r) { return r.s; }).join(' ')); w.labelRun = hr[0]; w.why = 'heading printed above the field';
+    });
+    // 6e unlabeled boxes under a split header such as "YES / NO"
+    var bare = checks.filter(function (cb) { return !cb.label && !cb.absorbedBy; }).sort(function (a, b) { return b.y1 - a.y1 || a.x1 - b.x1; });
+    var done = [];
+    bare.forEach(function (cb) {
+      if (done.indexOf(cb) >= 0) return;
+      var G = bare.filter(function (u) { return wSameLine(u, cb); }).sort(function (a, b) { return a.x1 - b.x1; });
+      G.forEach(function (u) { done.push(u); });
+      var gx1 = G[0].x1, gx2 = G[G.length - 1].x2, top = Math.max.apply(0, G.map(function (u) { return u.y2; }));
+      var hr = aboveRuns(pg, gx1, gx2, top, 30)[0];
+      if (!hr) return;
+      var parts = hr.s.split(/\s*[\/|]\s*|\s+or\s+/i).map(norm).filter(Boolean);
+      if (parts.length !== G.length) parts = hr.s.split(/\s+/);
+      if (parts.length !== G.length) return;
+      hr.role = 'label';
+      var q = pg.runs.filter(function (r) { return !r.role && r.line === hr.line && r.x2 <= hr.x1 + 1 && hr.x1 - r.x2 <= 34; }).sort(function (a, b) { return b.x2 - a.x2; })[0];
+      if (q) q.role = 'label';
+      var grp = { prompt: q ? q.s : '', exclusive: true, why: 'boxes under the split header "' + hr.s + '"', run: q || hr };
+      G.forEach(function (u, i) { u.label = parts[i]; u.group = grp; u.why = grp.why; });
+    });
+    // 6f caption or note printed under the field
+    texty.forEach(function (w) {
+      pg.runs.filter(function (r) { return !r.role && r.y < w.y1 && r.y >= w.y1 - 20 && ov(r.x1, r.x2, w.x1 - 4, w.x2 + 4) >= 0.5 * (r.x2 - r.x1); }).forEach(function (r) {
+        if (/^\(.*\)?$/.test(r.s) && r.s.length < 60) { r.role = 'hint'; w.hint = (w.hint ? w.hint + ' ' : '') + r.s.replace(/^\(|\)$/g, ''); }
+        else if (!w.label && r.y >= w.y1 - 14 && r.s.length < 50 && r.h <= 1.15 * body0) { r.role = 'label'; r.owner = w; w.label = r.s; w.labelRun = r; w.why = 'caption printed under the field'; }
+      });
+    });
+  }
+
+  /* ---------- 7. headings ---------- */
+  function findHeadings(pg) {
+    var body = median(pg.runs.filter(function (r) { return r.s.length >= 3; }).map(function (r) { return r.h; }));
+    pg.body = body;
+    pg.runs.forEach(function (r) {
+      if (r.role) return;
+      var s = clean(r.s), letters = s.replace(/[^A-Za-z]/g, '').length, words = s.split(/\s+/).length;
+      if (s.length < 4 || s.length > 72 || letters < 4 || /\.$/.test(s) || /^page\s+\d+/i.test(s) || /^(www\.|https?:)/i.test(s)) return;
+      var caps = upperRatio(s) >= 0.85 && (words >= 2 || letters >= 5), big = r.h >= 1.22 * body && words >= 2 && words <= 10;
+      if (!caps && !big) return;
+      var bad = pg.runs.some(function (q) {
+        if (q === r || q.line !== r.line || q.role) return false;
+        var g = q.x1 >= r.x2 ? q.x1 - r.x2 : r.x1 >= q.x2 ? r.x1 - q.x2 : 0;
+        if (g > 28) return false;
+        var qs = clean(q.s);
+        return !(upperRatio(qs) >= 0.85 && qs.length >= 4);
+      });
+      if (bad) return;
+      var cx = (r.x1 + r.x2) / 2, centered = Math.abs(cx - pg.w / 2) < 0.06 * pg.w && r.x1 > 0.14 * pg.w;
+      pg.headings.push({ id: 'p' + pg.num + 'h' + pg.headings.length, page: pg.num, s: s, x1: r.x1, x2: r.x2, y: r.y, h: r.h, major: r.h >= 1.22 * body || centered, run: r });
+    });
+    pg.headings.forEach(function (H) { H.run.role = 'heading'; });
+    // column spans for headings that share a line
+    pg.headings.forEach(function (H) {
+      var mates = pg.headings.filter(function (K) { return Math.abs(K.y - H.y) <= 5; }).sort(function (a, b) { return a.x1 - b.x1; });
+      H.mates = mates.length;
+      var i = mates.indexOf(H);
+      H.s1 = i === 0 ? -1e9 : H.x1 - 10; H.s2 = i === mates.length - 1 ? 1e9 : mates[i + 1].x1 - 10;
+    });
+  }
+  function owner(pg, a, rowExt, skip, exclLine) {
+    var best = null, bs = 1e9;
+    pg.headings.forEach(function (H) {
+      if (H === skip || H.dead) return;
+      var same = Math.abs(H.y - a.y) <= 5;
+      if (same && exclLine) return;
+      if (same ? !(H.x2 <= a.x1 + 6) : H.y < a.y) return;
+      var dy = Math.max(0, H.y - a.y), pen;
+      if (H.mates > 1) {
+        if (a.x1 < H.s2 - 20 && a.x2 > H.s2 + 20 && H.s2 < 1e8) return;
+        if (a.x1 < H.s1 + 20 - 10 && a.x2 > H.s1 + 20 && H.s1 > -1e8) return;
+        if (!(a.x1 >= H.s1 - 2 && a.x1 < H.s2)) return;
+        pen = 0;
+      } else if (H.major || same) pen = 0;
+      else if (ov(a.x1, a.x2, H.x1 - 10, H.x2 + 10) > 0) pen = 0;
+      else {
+        var gap = a.x1 > H.x2 ? a.x1 - H.x2 : H.x1 - a.x2;
+        pen = (rowExt && ov(rowExt[0], rowExt[1], H.x1, H.x2) > 0) ? 0.25 * gap : gap;
+      }
+      if (dy + pen < bs) { bs = dy + pen; best = H; }
+    });
+    return best;
+  }
+
+  /* ---------- 8. label parsing and typing ---------- */
+  function parseLabel(raw, keepParens) {
+    var o = { core: '', unit: '', hints: [], formula: null };
+    var s = clean(raw);
+    if (!keepParens && s.length <= 90) {
+      s = s.replace(/(^|\s)\(([^()]{2,})(?:\)(?=[\s.,;:]|$)|$)/g, function (m, a, inner) {
+        var t = norm(inner);
+        if (/^[A-Z]{2,6}$/.test(t)) return m;
+        if (UNIT_RE.test(t)) o.unit = t;
+        else if (/^(.+?)\s+[x×*]\s+(.+)$/i.test(t) && !/\d\s*x\s*\d/i.test(t)) o.formula = t;
+        else o.hints.push(t);
+        return a;
+      });
+      s = norm(s);
+      if (!s && o.hints.length) s = o.hints.shift();
+    }
+    o.core = s.replace(/\s*[:：]+$/, '');
+    return o;
+  }
+  var RULES = [
+    ['signature', /\bsignature\b|\bsign here\b/i, 'word "signature"'],
+    ['email', /e-?mail/i, 'word "e-mail"'],
+    ['fax', /\bfax\b|facsimile/i, 'word "fax"'],
+    ['phone', /\b(phone|telephone|tel|cell|mobile)\b/i, 'word "phone"'],
+    ['csz', /city.{0,4}state.{0,4}zip/i, 'city, state and ZIP named together'],
+    ['zip', /\bzip\b|postal code/i, 'word "zip"'],
+    ['state', /^state$/i, 'word "state"'],
+    ['city', /^city$/i, 'word "city"'],
+    ['date', /\bdate\b|\bdated\b/i, 'word "date"'],
+    ['license', /licen[sc]e\s*(#|no\b|num)|\bccb\b|\blic\.?\s*#/i, 'words "license #"'],
+    ['taxlot', /tax\s*lot|map\s*(&|and)\s*tax|parcel\s*(#|no\b|num|id)/i, 'words "tax lot"'],
+    ['record_id', /\b(permit|file|case|application|project|receipt|record)\s*(#|no\b\.?|number)/i, 'a record number'],
+    ['staff_person', /\b(received|reviewed|approved|accepted|processed)\s+by\b/i, 'words "received by"'],
+    ['currency', /\bfee\b|amount\s+(paid|due)|\$|valuation|\bcost\b/i, 'word "fee"'],
+    ['zone', /^zon(e|ing)\b|zoning\s+(district|designation)/i, 'word "zone"'],
+    ['site_address', /(site|property|project|situs|location|subject)\b.{0,24}address|address of (the )?(site|property)/i, 'words "site address"'],
+    ['address', /address|mailing|^street$/i, 'word "address"'],
+    ['text', /name of (the )?(building|shopping|project|development|subdivision|center)/i, 'a place name'],
+    ['company', /company|business name|\bfirm\b|organization|corporation/i, 'word "company"'],
+    ['percent', /(^|\s)%$|percent(age)?\b/i, 'percent sign'],
+    ['area', /\barea\b|square f(oo|ee)t|sq\.?\s*ft|acreage/i, 'word "area"'],
+    ['integer', /\bnumber of\b|\b(no\.|#|qty|quantity) of\b|how many/i, 'words "number of"'],
+    ['dimension', /\b(height|length|width|depth|frontage|setback|distance|diameter|clearance)\b/i, 'a measurement word'],
+    ['person', /\bname\b|\bcontact\b|applicant|representative|\bagent\b/i, 'a word for a person'],
+    ['textarea', /describe|description|explain|comments?\b|narrative|scope of work|reason for/i, 'words asking for a description']
+  ];
+  function typeOf(f, core, sec) {
+    if (f.kindHint === 'choice' || f.kindHint === 'checkbox' || f.kindHint === 'signature') return;
+    var act = f.actionText || '';
+    if (/AFDate/.test(act)) { f.type = 'date'; f.whyType = 'date format script in the PDF'; return; }
+    if (/AFPercent/.test(act)) { f.type = 'percent'; f.whyType = 'percent format script in the PDF'; return; }
+    if (/AFSpecial_Format\(2\)|AFSpecial_Keystroke\(2\)/.test(act)) { f.type = 'phone'; f.whyType = 'phone format script in the PDF'; return; }
+    if (/AFSpecial_Format\([01]\)/.test(act)) { f.type = 'zip'; f.whyType = 'ZIP format script in the PDF'; return; }
+    var opts = core.split(/\s*\/\s*/);
+    if (opts.length >= 2 && opts.length <= 6 && opts.every(function (o) { return /^[A-Za-z][A-Za-z .&-]{1,14}$/.test(o) && o.split(' ').length <= 2; }) && !/\b(and|or)\b/i.test(core) && !(f.prefix)) {
+      var pay = opts.every(function (o) { return /^(check|cash|credit|card|debit|money order|visa|mastercard)$/i.test(o); });
+      f.type = 'select'; f.options = opts.map(function (o) { return { label: titleCase(o) }; });
+      f.whyType = 'label lists the choices separated by slashes';
+      if (pay) { f.label = 'Payment Method'; f.payment = true; }
+      return;
+    }
+    for (var i = 0; i < RULES.length; i++) {
+      var R = RULES[i];
+      if (R[1].test(core)) { f.type = R[0]; f.whyType = R[2] + ' in the label'; break; }
+    }
+    if (f.type === 'text') f.whyType = 'a place or thing name; kept as free text';
+    if (!f.type || f.type === 'text') {
+      var u = (f.unit || '').toLowerCase();
+      if (/^%|percent/.test(u)) { f.type = 'percent'; f.whyType = 'unit printed after the blank'; }
+      else if (/sq|s\.?f|acre/.test(u)) { f.type = 'area'; f.whyType = 'unit printed after the blank'; }
+      else if (/ft|feet|foot|in\b|inch|lf|lin/.test(u)) { f.type = 'dimension'; f.whyType = 'unit printed after the blank'; }
+      else if (u) { f.type = 'number'; f.whyType = 'unit printed after the blank'; }
+    }
+    if (!f.type) {
+      if (f.multiLine || f.tall) { f.type = 'textarea'; f.whyType = 'tall or multi-line box in the PDF'; }
+      else { f.type = 'text'; f.whyType = 'no keyword matched; kept as free text'; }
+    }
+    if (f.type === 'area' && !f.unit && /square f|sq\.?\s*ft/i.test(core)) f.unit = 'sq. ft.';
+    if (f.type === 'percent') f.unit = '%';
+  }
+  var HOOKS = {
+    email: ['contacts', 'Email'], phone: ['contacts', 'Phone'], fax: ['contacts', 'Fax'],
+    license: ['licenses', 'License number'], taxlot: ['property', 'Tax lot'], zone: ['property', 'Zoning district'], site_address: ['property', 'Site address'],
+    record_id: ['permit', 'Record number'], staff_person: ['permit', 'Intake staff'], signature: ['esign', 'Signer'], attachment: ['documents', 'Upload']
+  };
+  var PARTY_HOOKS = { person: 'Contact name', company: 'Organization', address: 'Mailing address', csz: 'City / State / ZIP', city: 'City', state: 'State', zip: 'ZIP' };
+  function hookOf(f, sec) {
+    if (HOOKS[f.type]) return { sys: HOOKS[f.type][0], attr: HOOKS[f.type][1] };
+    if (sec && sec.kind === 'party' && PARTY_HOOKS[f.type]) return { sys: 'contacts', attr: PARTY_HOOKS[f.type] };
+    if (f.type === 'checkbox' && /primary contact/i.test(f.label)) return { sys: 'contacts', attr: 'Primary contact flag' };
+    if (sec && sec.kind === 'staff') {
+      if (f.type === 'date') return { sys: 'permit', attr: 'Date received' };
+      if (f.type === 'currency') return { sys: 'payments', attr: 'Amount paid' };
+      if (f.payment) return { sys: 'payments', attr: 'Payment method' };
+    }
+    return null;
+  }
+
+  /* ---------- 9. assemble the form model ---------- */
+  function build(pages, meta, issues) {
+    var F = {}, order = [], nid = 0;
+    var mk = function (o) { o.id = 'f' + (nid++); o.flags = o.flags || []; o.sources = o.sources || []; F[o.id] = o; return o; };
+    var src = function (w, extra) { var s = { page: w.page, name: w.name, x1: w.x1, y1: w.y1, x2: w.x2, y2: w.y2, wid: w.id }; if (extra) for (var k in extra) s[k] = extra[k]; return s; };
+    var secs = [], secBy = {}, last = null;
+    var title = '';
+    // document title: the largest multi-word heading on the first page
+    if (pages.length) {
+      var p1 = pages[0], cand = p1.headings.filter(function (H) { return H.s.split(/\s+/).length >= 2 && H.h >= 1.3 * p1.body; });
+      cand.sort(function (a, b) { var ka = /application|permit|request|review|form|determination|checklist|worksheet/i.test(a.s) ? 1 : 0, kb = /application|permit|request|review|form|determination|checklist|worksheet/i.test(b.s) ? 1 : 0; return kb - ka || b.h - a.h || b.y - a.y; });
+      if (cand[0]) {
+        title = titleCase(cand[0].s); cand[0].dead = true; cand[0].isTitle = true; meta.titleY = cand[0].y;
+        p1.headings.forEach(function (H) { if (H.y > cand[0].y + 5 && !/use only|office|staff|official/i.test(H.s)) H.dead = true; });
+      }
+    }
+    var getSec = function (H, pg) {
+      var key = H ? H.id : (last ? last.key : 'intro');
+      if (secBy[key]) return secBy[key];
+      var raw = H ? H.s : 'Application Details';
+      var s = { key: key, id: 's' + secs.length, raw: raw, title: titleCase(clean(raw.replace(/\(\s*required\s*\)/i, ''))), page: H ? H.page : pg.num, y: H ? H.y : 1e6, x: H ? H.x1 : 0, major: H ? H.major : true, H: H, items: [], required: /\(\s*required\s*\)|\*\s*$/i.test(raw) };
+      secBy[key] = s; secs.push(s); return s;
+    };
+    pages.forEach(function (pg) {
+      var rowExtOf = function (w) {
+        var x1 = 1e9, x2 = -1e9;
+        pg.widgets.forEach(function (u) { if (wSameLine(u, w)) { x1 = Math.min(x1, u.labelRun ? Math.min(u.labelRun.x1, u.x1) : u.x1); x2 = Math.max(x2, u.x2, u.labelRuns ? u.labelRuns[u.labelRuns.length - 1].x2 : u.x2); } });
+        return [x1, x2];
+      };
+      var secFor = function (a, ext, skip) { var H = owner(pg, a, ext, skip); var s = getSec(H, pg); return s; };
+      var anchor = function (w) {
+        var x1 = w.x1, x2 = w.x2;
+        if (w.labelRun && Math.abs(w.labelRun.y - w.y1) < 14) x1 = Math.min(x1, w.labelRun.x1);
+        if (w.labelRuns) { x1 = Math.min(x1, w.labelRuns[0].x1); x2 = Math.max(x2, w.labelRuns[0].x2); }
+        return { x1: x1, x2: x2, y: w.y1 + 2 };
+      };
+      // tables
+      pg.tables.forEach(function (tb) {
+        var s = secFor({ x1: tb.x1, x2: tb.x2, y: tb.yTop }, [tb.x1, tb.x2]);
+        var cols = tb.cols.map(function (g, ci) {
+          return mk({ rawLabel: g.head || ('Column ' + (ci + 1)), page: pg.num, x: g.x1, y: tb.yTop, sources: g.cells.map(function (w) { return src(w, { row: w.row + 1 }); }), why: g.head ? 'column heading printed above the grid' : '', inTable: true, flags: g.head ? [] : ['No column heading found above this column'] });
+        });
+        var t = { kind: 'table', id: tb.id, rows: tb.rows, cols: cols.map(function (c) { return c.id; }), totals: [], y: tb.yTop, x: tb.x1, page: pg.num };
+        tb.item = t; tb.fields = cols; s.items.push(t); last = s;
+      });
+      // everything else, in reading order
+      pg.widgets.slice().sort(function (a, b) { return b.y1 - a.y1 || a.x1 - b.x1; }).forEach(function (w) {
+        if (w.table) return;
+        var a = anchor(w), s = secFor(a, rowExtOf(w));
+        w.sec = s; last = s;
+        if (w.absorbedBy) return;
+        if (w.kind === 'checkbox' || w.kind === 'radio') { s.items.push({ kind: 'cb', w: w, y: w.y1, x: w.x1, page: pg.num }); return; }
+        var f = mk({ rawLabel: w.label || '', prefix: w.prefix || '', unit: w.unit || '', hint: w.hint || '', page: pg.num, x: a.x1, y: w.y1, sources: [src(w)], why: w.why || '', multiLine: w.multiLine, tall: (w.y2 - w.y1) >= 30, maxLen: w.maxLen, pdfRequired: w.required, pdfOptions: w.options, actionText: w.actions ? JSON.stringify(w.actions) : '', kindHint: w.kind === 'choice' ? 'choice' : w.kind === 'signature' ? 'signature' : '', layout: w.src === 'layout', altText: w.alt || '' });
+        w.field = f;
+        if (w.totalOf) { f.totalOf = w.totalOf; }
+        s.items.push({ kind: 'field', id: f.id, y: w.y1, x: a.x1, page: pg.num });
+      });
+      // bullets drawn as checkboxes in front of a fill-in line
+      pg.widgets.forEach(function (w) { if (w.absorbedBy && w.absorbedBy.field) { w.absorbedBy.field.sources.push(src(w, { merged: 'bullet' })); w.absorbedBy.field.flags.push('A checkbox bullet in front of this line was merged into the field'); } });
+    });
+    pages.forEach(function (pg) { pg.tables.forEach(function (tb) { tb.totals.forEach(function (w) { if (w.field) { tb.item.totals.push(w.field.id); } }); }); });
+
+    // group checkboxes
+    secs.forEach(function (s) { s.items.sort(function (a, b) { return a.page - b.page || (Math.abs(b.y - a.y) > 4 ? b.y - a.y : a.x - b.x); }); });
+    var optionLike = function (w) { return w.label && w.label.length <= 48 && !/[.;]$/.test(w.label); };
+    var makeChoice = function (s, list, prompt, why, exclusive) {
+      var pr = parseLabel(prompt || '');
+      var multi = exclusive ? false : true, hint = pr.hints.map(sentence).join('; ');
+      if (/check (only )?one|select one|choose one/i.test(prompt)) multi = false;
+      var names = list.map(function (it) { return clean(it.w.label).toLowerCase(); });
+      if (names.length === 2 && names.indexOf('yes') >= 0 && names.indexOf('no') >= 0) multi = false;
+      var f = mk({ rawLabel: pr.core, hint: hint, page: list[0].page, x: list[0].x, y: list[0].y + 6, type: multi ? 'choice' : 'radio', kindHint: 'choice', why: why, whyType: (multi ? 'a set of checkboxes' : 'a set of mutually exclusive boxes') + (/apply|one|any|all/i.test(hint) ? ' marked "' + hint + '"' : ''), options: list.map(function (it) { return { label: titleCase(clean(it.w.label)), src: src(it.w) }; }), sources: list.map(function (it) { return src(it.w, { option: clean(it.w.label) }); }) });
+      if (multi && !/all that apply|any/i.test(prompt)) f.flags.push('Printed as checkboxes; confirm whether more than one may be chosen');
+      if (!pr.core) f.flags.push('No question text found for this set of boxes');
+      var idx = s.items.indexOf(list[0]);
+      s.items = s.items.filter(function (it) { return list.indexOf(it) < 0; });
+      s.items.splice(Math.min(idx, s.items.length), 0, { kind: 'field', id: f.id, y: f.y, x: f.x, page: f.page });
+      return f;
+    };
+    // (a) a small all-caps heading that only governs option boxes is the question for those boxes
+    secs.slice().forEach(function (s) {
+      if (!s.H || s.H.major || s.H.isTitle) return;
+      var lead = [];
+      for (var i = 0; i < s.items.length; i++) { var it = s.items[i]; if (it.kind === 'cb' && optionLike(it.w)) lead.push(it); else break; }
+      var rest = s.items.length - lead.length, cue = /check (all|one|any)|select (all|one)|choose|that apply/i.test(s.H.s);
+      if (lead.length < 2 || !(cue || rest <= 1)) return;
+      var pg = pages[s.H.page - 1];
+      s.H.dead = true;
+      var H2 = owner(pg, { x1: s.H.x1, x2: s.H.x2, y: s.H.y }, [s.H.x1, s.H.x2], s.H, true);
+      var t = getSecByH(H2, pg);
+      s.items.forEach(function (it) { t.items.push(it); if (it.w) it.w.sec = t; });
+      makeChoice(t, lead, s.H.s, 'heading printed above the boxes', false);
+      secs.splice(secs.indexOf(s), 1); delete secBy[s.key];
+    });
+    function getSecByH(H, pg) { var key = H ? H.id : 'intro'; if (secBy[key]) return secBy[key]; return getSec(H, pg); }
+    // (b) boxes that already carry a split header (YES / NO)
+    secs.forEach(function (s) {
+      var seen = [];
+      s.items.filter(function (it) { return it.kind === 'cb' && it.w.group; }).forEach(function (it) {
+        if (seen.indexOf(it.w.group) >= 0) return; seen.push(it.w.group);
+        var list = s.items.filter(function (j) { return j.kind === 'cb' && j.w.group === it.w.group; });
+        makeChoice(s, list, it.w.group.prompt, it.w.group.why, true);
+      });
+    });
+    // (c) radio buttons that share a field name
+    secs.forEach(function (s) {
+      var by = {};
+      s.items.filter(function (it) { return it.kind === 'cb' && it.w.kind === 'radio'; }).forEach(function (it) { (by[it.w.name] = by[it.w.name] || []).push(it); });
+      Object.keys(by).forEach(function (n) {
+        var list = by[n], pg = pages[list[0].page - 1];
+        list.forEach(function (it) { if (!it.w.label) it.w.label = it.w.value || 'Option'; });
+        var x1 = Math.min.apply(0, list.map(function (it) { return it.w.x1; })), x2 = Math.max.apply(0, list.map(function (it) { return it.w.labelRuns ? it.w.labelRuns[0].x2 : it.w.x2; })), top = Math.max.apply(0, list.map(function (it) { return it.w.y2; }));
+        var lr = pg.runs.filter(function (r) { return !r.role && onLine(r, list[0].w) && r.x2 <= x1 + 2 && x1 - r.x2 < 60; }).sort(function (a, b) { return b.x2 - a.x2; })[0];
+        var hr = lr ? [lr] : aboveRuns(pg, x1, x2, top, 30);
+        hr.forEach(function (r) { r.role = 'label'; });
+        makeChoice(s, list, hr.length ? hr.map(function (r) { return r.s; }).join(' ') : titleCase(n), hr.length ? 'text printed beside the radio buttons' : 'PDF field name', true);
+      });
+    });
+    // (d) neighbouring option boxes with a shared question printed above them
+    secs.forEach(function (s) {
+      if (/submittal|checklist|attachment|required (materials|documents)|exhibits/i.test(s.raw)) return;
+      var cbs = s.items.filter(function (it) { return it.kind === 'cb' && optionLike(it.w); }), clusters = [], cur = [];
+      cbs.forEach(function (it) {
+        var p = cur[cur.length - 1];
+        if (p && p.page === it.page && Math.abs(p.y - it.y) <= 26 && Math.abs(it.x - p.x) < 260) cur.push(it); else { if (cur.length >= 2) clusters.push(cur); cur = [it]; }
+      });
+      if (cur.length >= 2) clusters.push(cur);
+      clusters.forEach(function (list) {
+        var pg = pages[list[0].page - 1];
+        var x1 = Math.min.apply(0, list.map(function (it) { return it.w.x1; })), x2 = Math.max.apply(0, list.map(function (it) { return it.w.labelRuns ? it.w.labelRuns[it.w.labelRuns.length - 1].x2 : it.w.x2; })), top = Math.max.apply(0, list.map(function (it) { return it.w.y2; }));
+        var hr = aboveRuns(pg, x1, x2, top, 34);
+        if (!hr.length) return;
+        hr.forEach(function (r) { r.role = 'label'; });
+        makeChoice(s, list, hr.map(function (r) { return r.s; }).join(' '), 'text printed above the boxes', false);
+      });
+    });
+    // (e) remaining boxes: checklists (nested by indent) and single checkboxes
+    secs.forEach(function (s) {
+      var cbs = s.items.filter(function (it) { return it.kind === 'cb'; });
+      if (!cbs.length) return;
+      var isList = cbs.length >= 3 && /submittal|checklist|attachment|required (materials|documents)|exhibits|requirements/i.test(s.raw);
+      var xs = []; cbs.forEach(function (it) { if (!xs.some(function (x) { return Math.abs(x - it.w.x1) <= 6; })) xs.push(it.w.x1); }); xs.sort(function (a, b) { return a - b; });
+      var stack = [];
+      cbs.forEach(function (it) {
+        var w = it.w, lvl = 0; xs.forEach(function (x, i) { if (Math.abs(x - w.x1) <= 6) lvl = i; });
+        var f = mk({ rawLabel: w.label || '', page: w.page, x: w.x1, y: w.y1, type: 'checkbox', kindHint: 'checkbox', why: w.why || '', whyType: 'a single checkbox in the PDF', sources: [src(w)], indent: isList ? lvl : 0, children: [] });
+        if (!w.label) f.flags.push('No label text found next to this checkbox');
+        it.kind = 'field'; it.id = f.id; delete it.w;
+        if (isList) {
+          while (stack.length && stack[stack.length - 1].indent >= lvl) stack.pop();
+          if (stack.length) { var par = stack[stack.length - 1]; par.children.push(f.id); f.parent = par.id; it.child = true; }
+          stack.push(f);
+        }
+      });
+      if (isList) {
+        s.kind = 'checklist';
+        s.items = s.items.filter(function (it) { return !it.child; });
+        s.items.forEach(function (it) {
+          var f = it.kind === 'field' ? F[it.id] : null; if (!f || f.type !== 'checkbox' || f.parent) return;
+          var top = /[:：]\s*(\(.*\))?\s*$/.test(norm(f.rawLabel)) || (f.children.length && f.rawLabel.length < 60);
+          if (top) { f.type = 'attachment'; f.whyType = 'a named item on the submittal checklist'; }
+          else { f.type = 'ack'; f.whyType = 'an instruction with a checkbox on the submittal checklist'; }
+        });
+      }
+    });
+
+    // notes: printed text that is not a label, kept as help text in its section
+    pages.forEach(function (pg) {
+      var loose = pg.runs.filter(function (r) { return !r.role && r.s.length >= 12 && !/^page\s+\d+$/i.test(r.s); });
+      if (pg.num === 1 && meta.titleY) loose = loose.filter(function (r) { return r.y < meta.titleY; });
+      loose.sort(function (a, b) { return b.y - a.y || a.x1 - b.x1; });
+      var paras = [];
+      loose.forEach(function (r) {
+        var p = paras[paras.length - 1];
+        if (p && p.lastY - r.y <= 1.7 * r.h && p.lastY - r.y >= -1 && (Math.abs(r.x1 - p.x1) < 60 || Math.abs(p.lastY - r.y) < 2)) { p.s += ' ' + r.s; p.lastY = r.y; p.x2 = Math.max(p.x2, r.x2); }
+        else paras.push({ s: r.s, x1: r.x1, x2: r.x2, y: r.y, lastY: r.y, page: pg.num });
+      });
+      pg.paras = paras;
+      if (!pg.widgets.length) return;
+      paras.forEach(function (p) {
+        if (p.s.length < 25) return;
+        var H = owner(pg, { x1: p.x1, x2: p.x2, y: p.y }, [p.x1, p.x2]);
+        var s = H ? secBy[H.id] : null;
+        if (!s && H && H.major) { s = getSec(H, pg); s.kind = 'info'; }
+        if (!s && !H && pg.num > 1) s = secs.filter(function (q) { return q.page < pg.num; }).pop();
+        if (s) s.items.push({ kind: 'note', text: norm(p.s), y: p.y - 0.5, x: p.x1, page: pg.num });
+      });
+    });
+
+    // order sections and their items
+    secs = secs.filter(function (s) { return s.items.length; });
+    secs.forEach(function (s) { s.items.sort(function (a, b) { return a.page - b.page || (Math.abs(b.y - a.y) > 4 ? b.y - a.y : a.x - b.x); }); });
+    var firstPos = function (s) { var it = s.items.filter(function (i) { return i.kind !== 'note'; })[0] || s.items[0]; return it; };
+    secs.forEach(function (s) { var it = firstPos(s); s.oy = s.y; s.op = s.page; if (it && it.kind !== 'note') { s.op = it.page; s.oy = it.y + 8; s.ox = it.x; } else s.ox = s.x; });
+    secs.sort(function (a, b) { return a.op - b.op || (Math.abs(b.oy - a.oy) > 9 ? b.oy - a.oy : a.ox - b.ox); });
+
+    // labels, types, hooks
+    secs.forEach(function (s) {
+      var fields = [];
+      s.items.forEach(function (it) { if (it.kind === 'field') fields.push(F[it.id]); if (it.kind === 'table') { it.cols.forEach(function (c) { fields.push(F[c]); }); } });
+      var deep = [], walk = function (f) { deep.push(f); (f.children || []).forEach(function (c) { walk(F[c]); }); };
+      fields.forEach(walk); fields = deep;
+      s.fields = fields;
+      fields.forEach(function (f) {
+        var boxy = f.type === 'checkbox' || f.type === 'ack' || f.type === 'attachment';
+        var pr = parseLabel(f.rawLabel, boxy && clean(f.rawLabel).length > 70);
+        f.core = pr.core;
+        if (boxy && f.core.length > 130) { var cut = f.core.search(/[.:]\s+[A-Z(]/); if (cut > 20) { f.hint = norm(f.core.slice(cut + 1)); f.core = f.core.slice(0, cut + 1).replace(/:$/, ''); } } if (pr.unit && !f.unit) f.unit = pr.unit; f.formulaText = pr.formula;
+        var hints = pr.hints.slice(); if (f.hint) hints.push(f.hint);
+        hints = hints.map(sentence).filter(function (h) { var m = /^max(?:imum)?\.?\s*(\d+(?:\.\d+)?)\s*([a-z. ]*)$/i.exec(h); if (m) { f.max = +m[1]; f.maxText = h; return false; } if (/^(if applicable|optional)$/i.test(h)) { f.optional = true; } return true; });
+        f.hint = hints.join('; ');
+        var src0 = f.sources[0] || {}, generic = /^(text|check ?box|radio ?button|button|field|fill|untitled|undefined|group|combo ?box|list ?box|dropdown|signature)?[\s_.-]*\d*$/i.test(src0.name || '');
+        if (!f.core && f.altText) { f.core = f.altText; f.why = 'tooltip stored in the PDF field'; }
+        if (!f.core && src0.name && !generic) { f.core = src0.name.replace(/[_.]+/g, ' '); f.why = 'PDF field name (no printed label found beside it)'; f.flags.push('Label taken from the PDF field name; no printed label sits beside this field'); }
+        if (!f.core) { f.core = 'Unlabeled field (page ' + f.page + ')'; f.flags.push('No label found; name this field'); f.unlabeled = true; }
+        f.label = titleCase(f.core.replace(/^(check|tick|mark)\s+(the\s+|this\s+)?(box\s+|here\s+)?(if|for)\s+/i, ''));
+        f.label = f.label.charAt(0).toUpperCase() + f.label.slice(1);
+        if (f.prefix) f.label = titleCase(f.prefix) + ' – ' + f.label;
+        if (f.kindHint === 'signature') { f.type = 'signature'; f.whyType = 'signature field in the PDF'; }
+        if (f.kindHint === 'choice' && !f.type) { f.type = 'select'; f.options = (f.pdfOptions || []).map(function (o) { return { label: o }; }); f.whyType = 'dropdown in the PDF'; }
+        typeOf(f, f.core, s);
+      });
+    });
+    // section kinds
+    secs.forEach(function (s) {
+      if (s.kind === 'info' || s.kind === 'checklist') return;
+      var n = s.fields.filter(function (f) { return /^(person|company|address|csz|phone|email)$/.test(f.type); }).length;
+      var kinds = {}; s.fields.forEach(function (f) { kinds[f.type] = 1; });
+      if (/office use|staff use|official use|for (city|department|county) use|do not write/i.test(s.raw)) s.kind = 'staff';
+      else if (n >= 3 && (kinds.phone || kinds.email) && (kinds.address || kinds.csz)) s.kind = 'party';
+      else s.kind = s.kind || 'plain';
+    });
+    secs.forEach(function (s) {
+      s.fields.forEach(function (f) {
+        if (s.kind === 'party' && f.type === 'address') f.whyType += ' (mailing address of this party)';
+        if (f.type === 'record_id' || f.type === 'staff_person' || s.kind === 'staff') f.staff = true;
+        f.hook = hookOf(f, s);
+        if (f.type === 'record_id') f.hook.attr = /permit/i.test(f.core) ? 'Permit number' : /file|case/i.test(f.core) ? 'File number' : 'Record number';
+        if (s.required && !f.staff && !f.optional) { f.required = true; f.whyReq = 'section heading says "(REQUIRED)"'; }
+        if (f.pdfRequired) { f.required = true; f.whyReq = 'marked required in the PDF field'; }
+        if (/\*\s*$/.test(f.rawLabel)) { f.required = true; f.whyReq = 'asterisk in the label'; }
+        if ((f.type === 'dimension') && !f.unit) f.flags.push('Unit is not printed on the PDF; the form offers ft or in');
+        if (f.layout) f.flags.push('Inferred from the page layout; this PDF has no fillable field here');
+      });
+    });
+    // stray: a text field whose name repeats a heading and has no label of its own
+    var heads = {}; pages.forEach(function (pg) { pg.headings.forEach(function (H) { heads[H.s.toLowerCase()] = 1; }); });
+    Object.keys(F).forEach(function (k) { var f = F[k], n = ((f.sources[0] || {}).name || '').toLowerCase(); if (f.why && /PDF field name/.test(f.why) && heads[n]) { f.flags = ['This field has no label and its PDF name repeats a heading; it may be a stray field']; f.stray = true; } });
+
+    // lead-in fields above numbered headings, then repeating groups
+    var numbered = function (s) { var m = /^(.*?)[\s#]*(?:no\.?|number)?\s*#?\s*(\d{1,2})$/i.exec(s.title); return m && m[1].length >= 4 ? { base: norm(m[1].replace(/[#\s]+$/, '')), n: +m[2] } : null; };
+    var groups = {};
+    secs.forEach(function (s) { var m = numbered(s); if (m) { s.num = m; (groups[m.base.toLowerCase()] = groups[m.base.toLowerCase()] || []).push(s); } });
+    Object.keys(groups).forEach(function (b) {
+      var g = groups[b]; if (g.length < 2) return;
+      var leads = g.map(function (s) {
+        var best = null;
+        secs.forEach(function (t) {
+          if (t === s || !t.items) return;
+          t.items.forEach(function (it) {
+            if (it.kind !== 'field' || it.page !== s.page) return;
+            var f = F[it.id]; if (!(it.y > s.y && it.y - s.y < 70 && it.x >= s.H.s1 - 2 && it.x < s.H.s2)) return;
+            if (!best || it.y < best.it.y) best = { it: it, t: t, f: f };
+          });
+        });
+        return best;
+      });
+      var labels = {}; leads.forEach(function (l) { if (l) labels[l.f.label] = (labels[l.f.label] || 0) + 1; });
+      var top = Object.keys(labels).sort(function (a, c) { return labels[c] - labels[a]; })[0];
+      if (top && labels[top] >= 0.6 * g.length) g.forEach(function (s, i) {
+        var l = leads[i]; if (!l || l.f.label !== top) return;
+        l.t.items.splice(l.t.items.indexOf(l.it), 1); l.t.fields.splice(l.t.fields.indexOf(l.f), 1);
+        s.items.unshift(l.it); s.fields.unshift(l.f); l.f.leadIn = true;
+        if (l.f.type === 'record_id') l.f.staff = true;
+      });
+      // collapse
+      var sig = function (s) { return s.fields.map(function (f) { return f.label + '|' + f.type; }); };
+      var base = g[0], bs = sig(base);
+      var same = g.filter(function (s) { var x = sig(s), inter = x.filter(function (v) { return bs.indexOf(v) >= 0; }).length; return inter / Math.max(x.length, bs.length) >= 0.6; });
+      if (same.length < 2) return;
+      base.repeat = { count: same.length, name: titleCase(g[0].num.base), pages: [] };
+      base.title = base.repeat.name;
+      same.forEach(function (s, i) {
+        if (base.repeat.pages.indexOf(s.page) < 0) base.repeat.pages.push(s.page);
+        if (s === base) { base.fields.forEach(function (f) { f.sources.forEach(function (x) { x.instance = 1; }); }); return; }
+        s.fields.forEach(function (f) {
+          var t = base.fields.filter(function (q) { return q.label === f.label && q.type === f.type && !q['_m' + i]; })[0];
+          if (t) {
+            t['_m' + i] = 1;
+            f.sources.forEach(function (x) { x.instance = i + 1; t.sources.push(x); });
+            if (t.options && f.options) t.options.forEach(function (o, k) { if (f.options[k]) (o.more = o.more || []).push(f.options[k].src); });
+            delete F[f.id];
+          } else { f.flags.push('Appears only in ' + s.title + ' on the PDF'); base.fields.push(f); base.items.push({ kind: 'field', id: f.id, y: -1e6, x: 0, page: f.page }); f.sources.forEach(function (x) { x.instance = i + 1; }); }
+        });
+        s.items.filter(function (it) { return it.kind === 'note'; }).forEach(function () {});
+        s.gone = true;
+      });
+    });
+    secs = secs.filter(function (s) { return !s.gone && s.items.length; });
+    secs.forEach(function (s) { if (s.repeat) { var par = null; pages[s.page - 1].headings.forEach(function (H) { if (H.major && !H.isTitle && H.y > s.y && (!par || H.y < par.y)) par = H; }); if (par) s.parent = titleCase(par.s); } });
+
+    secs.forEach(function (s) { var it = firstPos(s); if (it && it.kind !== 'note') { s.op = it.page; s.oy = it.y + 8; s.ox = it.x; } });
+    secs.sort(function (a, b) { return a.op - b.op || (Math.abs(b.oy - a.oy) > 9 ? b.oy - a.oy : a.ox - b.ox); });
+
+    // a "number of X" question that counts a repeating group
+    secs.forEach(function (s) {
+      if (!s.repeat) return;
+      var words = s.repeat.name.toLowerCase().split(/[^a-z]+/).filter(function (w) { return w.length > 2; }).map(function (w) { return w.replace(/s$/, ''); });
+      secs.forEach(function (t) {
+        if (t === s) return;
+        t.fields.forEach(function (f) {
+          if (f.type !== 'integer' || s.repeat.countField) return;
+          var l = f.label.toLowerCase();
+          if (words.every(function (w) { return l.indexOf(w) >= 0; })) { s.repeat.countField = f.id; f.counts = s.id; f.whyCalc = 'suggested: this question counts the "' + s.repeat.name + '" blocks'; }
+        });
+      });
+    });
+
+    // calculations
+    secs.forEach(function (s) {
+      var fs = s.fields;
+      fs.forEach(function (f) {
+        if (f.formulaText) {
+          var m = /^(.+?)\s+[x×*]\s+(.+)$/i.exec(f.formulaText), res = function (t) {
+            t = norm(t); var pm = /^(\d+(?:\.\d+)?)\s*%$/.exec(t); if (pm) return { k: +pm[1] / 100, text: t };
+            if (/^\d+(\.\d+)?$/.test(t)) return { k: +t, text: t };
+            var words = t.toLowerCase().split(/\s+/);
+            var c = fs.filter(function (q) { return q !== f && !q.options && words.every(function (w) { return q.core.toLowerCase().indexOf(w) >= 0; }); }).sort(function (a, b) { return a.core.length - b.core.length; })[0];
+            return c ? { f: c.id, text: c.label } : null;
+          };
+          var A = m && res(m[1]), B = m && res(m[2]);
+          if (A && B) { f.calc = { op: 'mul', a: A, b: B, text: A.text + ' × ' + B.text, firm: true }; f.whyCalc = 'formula printed in the label: (' + f.formulaText + ')'; }
+          else f.hint = (f.hint ? f.hint + '; ' : '') + f.formulaText;
+        } else if (f.type === 'area' && !f.inTable && !f.totalOf) {
+          var dims = fs.filter(function (q) { return q.type === 'dimension' && (f.prefix ? true : true); });
+          var pick = function (re) { var c = dims.filter(function (q) { return re.test(q.core); }); var p = c.filter(function (q) { return q.prefix; }); if (p.length === 1) return p[0]; return c.length === 1 ? c[0] : null; };
+          var H = pick(/height/i), L = pick(/length|width/i);
+          if (H && L && H !== L) { f.calc = { op: 'mul', a: { f: H.id, text: H.label }, b: { f: L.id, text: L.label }, text: H.label + ' × ' + L.label, firm: false }; f.whyCalc = 'suggested: an area next to one height and one length'; f.flags.push('Suggested calculation (height × length); the PDF does not state a formula'); }
+        }
+        if (f.totalOf) {
+          var tb = f.totalOf.table, col = tb.fields[f.totalOf.col];
+          f.calc = { op: 'sum', col: col.id, text: 'sum of ' + titleCase(parseLabel(col.rawLabel).core), firm: true }; f.whyCalc = 'sits under the column in a row labeled "' + (f.rowLabel || 'total') + '"';
+          f.unit = f.unit || col.unit;
+        }
+      });
+      // a total cell without its own label takes the row label from its neighbour
+      var tot = fs.filter(function (f) { return f.totalOf; });
+      if (tot.length) {
+        var named = tot.filter(function (f) { return !f.unlabeled; })[0];
+        tot.forEach(function (f) {
+          var col = f.totalOf.table.fields[f.totalOf.col], cl = titleCase(parseLabel(col.rawLabel).core), rowL = named ? titleCase(named.core) : 'Total';
+          f.label = rowL + ' – ' + cl; f.unlabeled = false; f.flags = f.flags.filter(function (x) { return !/No label found/.test(x); }); f.type = col.type === 'text' ? 'number' : col.type; f.whyType = 'follows its column'; f.why = 'row label "' + rowL + '" and the column heading'; f.hook = null;
+        });
+      }
+    });
+
+    // keys, ordering, stats
+    var staffSecs = secs.filter(function (s) { return s.kind === 'staff'; });
+    secs = secs.filter(function (s) { return s.kind !== 'staff'; }).concat(staffSecs);
+    var usedKeys = {};
+    secs.forEach(function (s) {
+      s.slug = slug(s.title); var n = 2, b = s.slug; while (usedKeys['s:' + s.slug]) s.slug = b + '_' + (n++); usedKeys['s:' + s.slug] = 1;
+      s.fields = s.fields.filter(function (f) { return F[f.id]; });
+      s.items = s.items.filter(function (it) { return it.kind !== 'field' || F[it.id]; });
+      s.fields.forEach(function (f) {
+        var k = slug(f.label), b2 = k, m = 2; while (usedKeys[s.slug + '.' + k]) k = b2 + '_' + (m++); usedKeys[s.slug + '.' + k] = 1;
+        f.key = s.slug + '.' + k; f.sec = s.id;
+        f.conf = f.flags.length ? (f.unlabeled || f.stray ? 'low' : 'med') : 'high';
+        delete f.pdfOptions; delete f.actionText; delete f.kindHint; delete f.multiLine; delete f.tall; delete f.totalOf;
+        Object.keys(f).forEach(function (kk) { if (/^_m\d+$/.test(kk)) delete f[kk]; });
+      });
+    });
+    var nW = 0; pages.forEach(function (pg) { nW += pg.widgets.length; });
+    var all = []; secs.forEach(function (s) { s.fields.forEach(function (f) { all.push(f); }); });
+    var out = {
+      title: title || meta.fileName.replace(/\.pdf$/i, ''), fileName: meta.fileName, pages: pages.length, mode: meta.mode,
+      agency: meta.agency, sections: secs.map(function (s) {
+        return { id: s.id, slug: s.slug, title: s.title, kind: s.kind, page: s.page, required: !!s.required, repeat: s.repeat || null, parent: s.parent || '', items: s.items.map(function (it) { return it.kind === 'note' ? { kind: 'note', text: it.text, page: it.page } : it.kind === 'table' ? { kind: 'table', id: it.id, rows: it.rows, cols: it.cols, totals: it.totals } : { kind: 'field', id: it.id }; }) };
+      }),
+      fields: F, order: all.map(function (f) { return f.id; }), issues: issues,
+      refPages: pages.filter(function (pg) { return !pg.widgets.length && pg.textChars > 40; }).map(function (pg) { return pg.num; }),
+      pageSizes: pages.map(function (pg) { return { w: pg.w, h: pg.h }; }),
+      stats: { pdfFields: nW, webFields: all.length, linked: all.filter(function (f) { return f.hook; }).length, review: all.filter(function (f) { return f.flags.length; }).length, sections: secs.length, repeats: secs.filter(function (s) { return s.repeat; }).length, tables: secs.reduce(function (n, s) { return n + s.items.filter(function (i) { return i.kind === 'table'; }).length; }, 0) }
+    };
+    return out;
+  }
+
+  async function analyze(doc, lib, fileName) {
+    var pages = [], issues = [];
+    for (var p = 1; p <= doc.numPages; p++) pages.push(await readPage(await doc.getPage(p), lib, p, issues));
+    var mode = pages.some(function (pg) { return pg.widgets.length; }) ? 'acroform' : 'layout';
+    var chars = pages.reduce(function (n, pg) { return n + pg.textChars; }, 0);
+    if (mode === 'layout') pages.forEach(function (pg) { synthesize(pg, issues); });
+    pages.forEach(function (pg) { detectTables(pg); labelPage(pg); findHeadings(pg); });
+    var agency = [];
+    if (pages.length) pages[0].runs.forEach(function (r) { if (r.y > pages[0].h * 0.8 && /^(city|county|town) of\b|department$|division$|bureau$/i.test(r.s) && r.s.length < 50) agency.push(titleCase(r.s)); });
+    var model = build(pages, { fileName: fileName || 'document.pdf', mode: mode, agency: agency }, issues);
+    model.noText = chars < 40;
+    return model;
+  }
+
+  function rehook(f, kind) { f.staff = (f.type === 'record_id' || f.type === 'staff_person' || kind === 'staff'); f.hook = hookOf(f, { kind: kind }); if (f.type === 'percent') f.unit = '%'; return f; }
+  var api = { analyze: analyze, titleCase: titleCase, parseLabel: parseLabel, slug: slug, rehook: rehook };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FormReader = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var FR = window.FormReader, lib = window.pdfjsLib;
+  var M = null, doc = null, canv = {}, secBy = {}, uid = 0;
+  var ui = { view: 'form', staff: false, hl: true, sel: null, page: 1, filter: 'all', sample: false };
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  function h(tag, a, kids) {
+    var e = document.createElement(tag);
+    if (a) Object.keys(a).forEach(function (k) {
+      var v = a[k]; if (v == null || v === false) return;
+      if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v;
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v);
+      else if (k === 'data') Object.keys(v).forEach(function (d) { e.dataset[d] = v[d]; });
+      else if (v === true) e.setAttribute(k, ''); else e.setAttribute(k, v);
+    });
+    (Array.isArray(kids) ? kids : kids != null ? [kids] : []).forEach(function (c) { if (c == null || c === false) return; e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return e;
+  }
+
+  var SYS = {
+    contacts: { tag: 'CRM', name: 'Contacts (CRM)', does: 'Find the person or business, or create the record.' },
+    property: { tag: 'GIS', name: 'Property and GIS', does: 'Look up the site; tax lot and zone can come back from the map.' },
+    licenses: { tag: 'Licenses', name: 'Business licenses', does: 'Check the license number against the registry.' },
+    permit: { tag: 'Permit', name: 'Permit record', does: 'Open the case; numbers and dates are assigned, not typed.' },
+    payments: { tag: 'Payments', name: 'Payments', does: 'Read the fee from the payment record.' },
+    esign: { tag: 'E-sign', name: 'E-signature', does: 'Record who signed and when.' },
+    documents: { tag: 'Documents', name: 'Document storage', does: 'File the uploads with the case.' }
+  };
+  var HOOKS = ['contacts|Contact name', 'contacts|Organization', 'contacts|Mailing address', 'contacts|City / State / ZIP', 'contacts|City', 'contacts|State', 'contacts|ZIP', 'contacts|Phone', 'contacts|Fax', 'contacts|Email', 'contacts|Primary contact flag', 'property|Site address', 'property|Tax lot', 'property|Zoning district', 'licenses|License number', 'permit|Permit number', 'permit|File number', 'permit|Record number', 'permit|Date received', 'permit|Intake staff', 'payments|Amount paid', 'payments|Payment method', 'esign|Signer', 'documents|Upload'];
+  var TYPES = { text: 'Short text', textarea: 'Long text', person: 'Person name', company: 'Organization name', email: 'Email', phone: 'Phone', fax: 'Fax number', address: 'Mailing address', site_address: 'Site address', csz: 'City, state, ZIP', city: 'City', state: 'State', zip: 'ZIP code', date: 'Date', integer: 'Whole number', number: 'Number', dimension: 'Measurement', area: 'Area', percent: 'Percent', currency: 'Dollar amount', select: 'Dropdown', radio: 'Choose one', choice: 'Choose any', checkbox: 'Checkbox', ack: 'Acknowledgment', attachment: 'File upload', signature: 'Signature', license: 'License number', taxlot: 'Tax lot', zone: 'Zoning district', record_id: 'Record number', staff_person: 'Staff member' };
+  var STATES = 'AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
+  var EX = [
+    { org: 'Example Sign Co.', name: 'Jordan Example', addr: '100 Example St', city: 'Beaverton', st: 'OR', zip: '97005', phone: '(503) 555-0100', fax: '(503) 555-0101', email: 'jordan@example.com' },
+    { org: 'Sample Property Management LLC', name: 'Riley Sample', addr: '200 Sample Ave, Suite 4', city: 'Portland', st: 'OR', zip: '97204', phone: '(503) 555-0142', fax: '', email: 'riley@example.org' },
+    { org: 'Placeholder Bakery', name: 'Morgan Placeholder', addr: '300 Placeholder Blvd', city: 'Beaverton', st: 'OR', zip: '97008', phone: '(503) 555-0177', fax: '', email: 'morgan@example.net' }
+  ];
+  function tagText(hk) { return SYS[hk.sys].tag + ' · ' + hk.attr; }
+  function fields() { return M.order.map(function (id) { return M.fields[id]; }); }
+  function live() { return fields().filter(function (f) { return !f.off; }); }
+  function plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
+
+  /* ---------------- title block ---------------- */
+  function renderTB() {
+    var t = $('#tb'); t.textContent = '';
+    var L = live(), one = 0, rep = 0, tab = 0, opt = 0, mer = 0, total = 0;
+    fields().forEach(function (f) { f.sources.forEach(function (x) { total++; var s = secBy[f.sec]; if (x.merged) mer++; else if (x.row) tab++; else if (s && s.repeat) rep++; else if (x.option) opt++; else one++; }); });
+    var linked = L.filter(function (f) { return f.hook; }).length, rev = L.filter(function (f) { return f.flags.length; }).length;
+    var cell = function (cap, v, sub, cls) { return h('div', null, [h('div', { class: 'cap', text: cap }), h('div', { class: 'v ' + (cls || ''), text: String(v) }), sub ? h('div', { class: 's', text: sub }) : null]); };
+    var parts = [];
+    var add = function (n, txt) { if (n) parts.push(h('span', null, [h('b', { text: String(n) }), ' ' + txt])); };
+    add(one, 'carried over one to one');
+    add(rep, 'folded into ' + plural(M.stats.repeats, 'repeating block'));
+    add(tab, 'folded into ' + plural(M.stats.tables, 'table'));
+    add(opt, 'grouped as answer choices');
+    add(mer, 'checkbox bullets merged into the line they sit on');
+    var led = h('div', { class: 'ledger' }, [h('span', null, [h('b', { text: String(total) }), ' fields on the PDF:'])]);
+    parts.forEach(function (p, i) { led.appendChild(p); if (i < parts.length - 1) led.appendChild(document.createTextNode('+')); });
+    var notes = [];
+    var cov = M.issues.filter(function (i) { return i.kind === 'covered'; });
+    var byP = {}; cov.forEach(function (i) { (byP[i.page] = byP[i.page] || []).push(i.text); });
+    Object.keys(byP).forEach(function (pn) { notes.push('Page ' + pn + ': text that sits under white-out or a later layer on the PDF was left out ("' + byP[pn].join(' … ') + '").'); });
+    M.issues.filter(function (i) { return i.kind === 'grid'; }).forEach(function (i) { notes.push('Page ' + i.page + ': ' + i.text); });
+    if (M.refPages.length) notes.push('Page' + (M.refPages.length > 1 ? 's ' : ' ') + M.refPages.join(', ') + ' of the PDF hold reference material and no fields; they stay available in the source viewer.');
+    if (notes.length) led.appendChild(h('details', null, [h('summary', { text: plural(notes.length, 'reading note') }), h('ul', null, notes.map(function (n) { return h('li', { text: n }); }))]));
+    t.appendChild(h('div', { class: 'tb' }, [
+      h('div', null, [h('div', { class: 'cap', text: ui.sample ? 'Sample form loaded' : 'Form' }), h('div', { class: 'v name', text: M.title }), h('div', { class: 's', text: (M.agency.length ? M.agency.join(' · ') + ' · ' : '') + M.fileName })]),
+      cell('PDF pages', M.pages, M.mode === 'layout' ? 'no fillable fields' : 'fillable PDF'),
+      cell('PDF fields', total),
+      cell('Web fields', L.length, plural(M.sections.filter(function (s) { return s.kind !== 'info'; }).length, 'section')),
+      cell('System-linked', linked, 'prefill or look up', 'link'),
+      cell('To review', rev, rev ? 'see Field map' : 'nothing flagged', rev ? 'red' : ''),
+      led
+    ]));
+  }
+
+  /* ---------------- form ---------------- */
+  function numWrap(inp, f, cid) {
+    var w = h('div', { class: 'num' }, [inp]);
+    if (f.type === 'currency') w.insertBefore(h('span', { class: 'u', text: '$' }), inp);
+    if (f.type === 'dimension' && !f.unit) w.appendChild(h('select', { id: cid + '_u', 'aria-label': 'Unit for ' + f.label, data: { unit: f.id } }, [h('option', { value: 'ft', text: 'ft' }), h('option', { value: 'in', text: 'in' })]));
+    else if (f.unit) w.appendChild(h('span', { class: 'u', text: f.unit.replace(/^sq\.?\s*ft\.?$/i, 'sq ft').replace(/^ft\.$/i, 'ft') }));
+    return w;
+  }
+  function staffHint(f) { return f.type === 'record_id' ? 'Assigned by the permit system' : f.type === 'date' ? 'Stamped on receipt' : f.type === 'staff_person' ? 'Signed-in staff member' : (f.hook && f.hook.sys === 'payments') ? 'From the payment record' : 'Filled by staff'; }
+  function control(f, cid) {
+    var a = { id: cid, data: { val: f.id } }, t = f.type, e;
+    if (f.staff) { a.disabled = true; a.placeholder = staffHint(f); }
+    if (f.required && !f.staff) a['aria-required'] = 'true';
+    if (t === 'textarea') return h('textarea', Object.assign(a, { rows: 3 }));
+    if (t === 'email') return h('input', Object.assign(a, { type: 'email', autocomplete: 'off', inputmode: 'email' }));
+    if (t === 'phone' || t === 'fax') return h('input', Object.assign(a, { type: 'tel', inputmode: 'tel', placeholder: a.placeholder || '(503) 555-0100', data: { val: f.id, mask: 'phone' } }));
+    if (t === 'date') return h('input', Object.assign(a, f.staff ? { type: 'text' } : { type: 'date' }));
+    if (t === 'state') return h('select', a, [h('option', { value: '', text: 'State' })].concat(STATES.map(function (s) { return h('option', { value: s, text: s }); })));
+    if (t === 'zip') return h('input', Object.assign(a, { type: 'text', inputmode: 'numeric', maxlength: 10 }));
+    if (t === 'select') return h('select', a, [h('option', { value: '', text: f.staff ? staffHint(f) : 'Choose one' })].concat((f.options || []).map(function (o) { return h('option', { value: o.label, text: o.label }); })));
+    if (/^(integer|number|dimension|area|percent|currency)$/.test(t)) {
+      Object.assign(a, f.staff ? { type: 'text' } : { type: 'number', min: 0, step: t === 'integer' ? 1 : 'any', inputmode: t === 'integer' ? 'numeric' : 'decimal' });
+      if (f.max != null) a.max = f.max;
+      if (f.calc) { a.data = { val: f.id, calc: f.id }; if (f.calc.firm) { a.readonly = true; a.tabindex = 0; } }
+      if (f.counts) a.data = { val: f.id, count: f.counts };
+      e = h('input', a);
+      return (f.unit || t === 'dimension' || t === 'currency') ? numWrap(e, f, cid) : e;
+    }
+    if (t === 'signature') return h('input', Object.assign(a, { type: 'text', class: 'sig', placeholder: 'Type your full name to sign' }));
+    return h('input', Object.assign(a, { type: 'text', maxlength: f.maxLen || null }));
+  }
+  function width(f) {
+    if (/^(address|site_address|textarea|attachment|ack|csz|checkbox|signature)$/.test(f.type) || f.label.length > 44) return 'w6';
+    if (/^(choice|radio)$/.test(f.type)) return (f.options || []).length > 2 ? 'w6' : '';
+    if (/^(phone|fax|zip|state|date|integer|number|dimension|area|percent|currency|record_id)$/.test(f.type)) return f.label.length > 24 ? '' : 'w2';
+    return '';
+  }
+  function tags(f) {
+    var t = [];
+    if (f.hook) t.push(h('span', { class: 'tag link', text: tagText(f.hook), title: SYS[f.hook.sys].does }));
+    if (f.calc) t.push(h('span', { class: 'tag calc', text: (f.calc.firm ? '= ' : 'suggested = ') + f.calc.text }));
+    if (f.counts) t.push(h('span', { class: 'tag calc', text: 'counts the ' + secBy[f.counts].title + ' blocks' }));
+    if (f.flags.length) t.push(h('span', { class: 'tag rev', text: 'review', title: f.flags.join(' ') }));
+    return t.length ? h('div', { class: 'tags' }, t) : null;
+  }
+  function pin(f) { return h('button', { class: 'pin', type: 'button', title: 'Show this field on the PDF', text: 'PDF p' + f.page, onclick: function (ev) { ev.preventDefault(); select(f.id, false); } }); }
+  function fieldEl(f, sfx) {
+    if (f.off) return null;
+    var cid = 'c_' + f.id + sfx, t = f.type;
+    var box = h('div', { class: 'fld ' + width(f) + (f.hook ? ' linked' : '') + (f.staff ? ' staff' : ''), data: { fid: f.id }, id: 'fld_' + f.id + sfx });
+    var req = f.required && !f.staff ? h('span', { class: 'req', text: 'required' }) : null;
+    var hint = [f.hint, f.max != null ? 'Maximum ' + f.max + (f.unit ? ' ' + f.unit : '') : '', f.optional && !/applicable|optional/i.test(f.hint || '') ? 'If applicable' : ''].filter(Boolean).join(' · ');
+    if (t === 'checkbox' || t === 'ack' || t === 'attachment') {
+      var kids = (f.children || []).map(function (c) { return fieldEl(M.fields[c], sfx); }).filter(Boolean);
+      var head = h('div', { class: 'lab' }, [
+        t === 'attachment' ? h('label', { class: 'l', for: cid, text: f.label }) : h('label', { class: 'check' + (f.children && f.children.length ? ' strong' : '') }, [h('input', { type: 'checkbox', id: cid, data: { val: f.id }, disabled: f.staff }), h('span', { text: f.label })]),
+        pin(f)]);
+      box.appendChild(head);
+      if (hint) box.appendChild(h('div', { class: 'hint', id: cid + '_h', text: hint }));
+      if (t === 'attachment') {
+        box.appendChild(h('div', { class: 'up' }, [h('input', { type: 'file', id: cid, multiple: true, 'aria-describedby': hint ? cid + '_h' : null }), kids.length ? h('div', { class: 'hint', text: 'The PDF asks that this item show:' }) : null, kids.length ? h('div', { class: 'kids' }, kids) : null]));
+      } else if (kids.length) box.appendChild(h('div', { class: 'kids' }, kids));
+      var tg = tags(f); if (tg) box.appendChild(tg);
+      return box;
+    }
+    if (t === 'choice' || t === 'radio') {
+      var fs = h('fieldset', null, [h('div', { class: 'lab' }, [h('legend', null, [f.label, req]), pin(f)])]);
+      fs.appendChild(h('div', { class: 'opts' }, (f.options || []).map(function (o, i) {
+        return h('label', { class: 'check' }, [h('input', { type: t === 'radio' ? 'radio' : 'checkbox', name: cid, id: cid + '_' + i, value: o.label, disabled: f.staff }), h('span', { text: o.label })]);
+      })));
+      box.appendChild(fs);
+    } else if (t === 'csz') {
+      box.appendChild(h('div', { class: 'lab' }, [h('label', { class: 'l', for: cid, text: f.label }), pin(f)]));
+      box.appendChild(h('div', { class: 'csz' }, [
+        h('label', null, ['City', h('input', { type: 'text', id: cid, data: { part: 'city' } })]),
+        h('label', null, ['State', h('select', { id: cid + '_s', data: { part: 'state' } }, [h('option', { value: '', text: ' ' })].concat(STATES.map(function (s) { return h('option', { value: s, text: s }); })))]),
+        h('label', null, ['ZIP', h('input', { type: 'text', id: cid + '_z', inputmode: 'numeric', maxlength: 10, data: { part: 'zip' } })])
+      ]));
+    } else {
+      box.appendChild(h('div', { class: 'lab' }, [h('label', { class: 'l', for: cid }, [f.label, req]), pin(f)]));
+      box.appendChild(control(f, cid));
+      if (t === 'signature') hint = (hint ? hint + ' · ' : '') + 'Typing a name here stands in for the wet signature on the PDF.';
+    }
+    if (hint) box.appendChild(h('div', { class: 'hint', text: hint }));
+    var tg2 = tags(f); if (tg2) box.appendChild(tg2);
+    return box;
+  }
+  function noteEl(text) {
+    if (text.length > 260) return h('details', { class: 'note' }, [h('summary', { text: text.slice(0, 110).replace(/\s+\S*$/, '') + '…' }), h('p', { text: text })]);
+    return h('p', { class: 'note', text: text });
+  }
+  function tableEl(it) {
+    var cols = it.cols.map(function (c) { return M.fields[c]; }).filter(function (f) { return !f.off; });
+    var tots = it.totals.map(function (c) { return M.fields[c]; });
+    var body = h('tbody');
+    var addRow = function () {
+      var sfx = '_r' + (uid++), tr = h('tr');
+      cols.forEach(function (f) { tr.appendChild(h('td', { class: 'fld', data: { fid: f.id } }, [h('input', { type: /^(area|dimension|number|integer|percent|currency)$/.test(f.type) ? 'number' : 'text', min: 0, step: 'any', id: 'c_' + f.id + sfx, 'aria-label': f.label, data: { val: f.id } })])); });
+      tr.appendChild(h('td', null, [h('button', { class: 'x', type: 'button', 'aria-label': 'Remove row', text: '×', onclick: function () { tr.remove(); recalc(); } })]));
+      body.appendChild(tr);
+    };
+    for (var i = 0; i < 3; i++) addRow();
+    var foot = null;
+    if (tots.length) {
+      foot = h('tfoot', null, [h('tr', null, cols.map(function (f, i) {
+        var tf = tots.filter(function (q) { return q.calc && q.calc.col === f.id; })[0];
+        if (!tf) return h('td', { text: i === 0 ? tots[0].label.split(' – ')[0] : '' });
+        return h('td', { class: 'fld', data: { fid: tf.id } }, [h('input', { type: 'number', readonly: true, id: 'c_' + tf.id, 'aria-label': tf.label, data: { val: tf.id, calc: tf.id } })]);
+      }).concat([h('td')]))]);
+    }
+    var tbl = h('table', { class: 'tbl' }, [h('thead', null, [h('tr', null, cols.map(function (f) { return h('th', null, [f.label, f.unit ? h('span', { class: 'hint', text: ' (' + f.unit + ')' }) : null, f.flags.length ? h('span', { class: 'tag rev', text: 'review', title: f.flags.join(' ') }) : null, ' ', pin(f)]); }).concat([h('th')]))]), body, foot]);
+    return h('div', { class: 'tblwrap' }, [tbl, h('div', { class: 'submit', style: 'margin-top:8px' }, [h('button', { class: 'btn ghost small', type: 'button', text: 'Add a row', onclick: function () { addRow(); } }), h('span', { class: 'hint', text: 'The PDF has ' + it.rows + ' blank rows; the web form grows as needed. Totals add themselves.' })])]);
+  }
+  function gridEl(s, sfx) {
+    var g = h('div', { class: 'grid' }), totals = {};
+    s.items.forEach(function (it) { if (it.kind === 'table') it.totals.forEach(function (t) { totals[t] = 1; }); });
+    s.items.forEach(function (it) {
+      if (it.kind === 'note') g.appendChild(noteEl(it.text));
+      else if (it.kind === 'table') g.appendChild(tableEl(it));
+      else if (!totals[it.id]) { var f = M.fields[it.id]; if (f.staff && !ui.staff) return; var e = fieldEl(f, sfx); if (e) g.appendChild(e); }
+    });
+    return g;
+  }
+  function partyBar(s, first) {
+    var sel = h('select', { 'aria-label': 'Fill ' + s.title + ' from a contact record', id: 'crm_' + s.id }, [h('option', { value: '', text: 'Find an existing contact…' })].concat(EX.map(function (r, i) { return h('option', { value: String(i), text: r.org + ' — ' + r.name + ' (example record)' }); })));
+    sel.addEventListener('change', function () { if (sel.value !== '') fillParty(s, EX[+sel.value]); });
+    var kids = [h('span', { class: 'cap', text: 'CRM lookup' }), sel];
+    if (first && first !== s) kids.push(h('button', { class: 'btn ghost small', type: 'button', text: 'Same as ' + first.title, onclick: function () { copyParty(first, s); } }));
+    return h('div', { class: 'crm' }, kids);
+  }
+  function setVal(scope, f, v) {
+    var el = scope.querySelector('.fld[data-fid="' + f.id + '"]'); if (!el) return;
+    if (f.type === 'csz') { var p = v || {}; ['city', 'state', 'zip'].forEach(function (k) { var i = el.querySelector('[data-part="' + k + '"]'); if (i) i.value = p[k] || ''; }); return; }
+    var i = el.querySelector('[data-val]'); if (i) i.value = v == null ? '' : v;
+  }
+  function fillParty(s, r) {
+    var scope = $('#sec_' + s.id);
+    s.items.forEach(function (it) {
+      if (it.kind !== 'field') return; var f = M.fields[it.id]; if (!f.hook || f.hook.sys !== 'contacts') return;
+      var m = { 'Organization': r.org, 'Contact name': r.name, 'Mailing address': r.addr, 'City / State / ZIP': { city: r.city, state: r.st, zip: r.zip }, 'City': r.city, 'State': r.st, 'ZIP': r.zip, 'Phone': r.phone, 'Fax': r.fax, 'Email': r.email };
+      if (m.hasOwnProperty(f.hook.attr)) setVal(scope, f, m[f.hook.attr]);
+    });
+  }
+  function copyParty(a, b) {
+    var sa = $('#sec_' + a.id), sb = $('#sec_' + b.id);
+    b.items.forEach(function (it) {
+      if (it.kind !== 'field') return; var f = M.fields[it.id]; if (!f.hook || f.hook.sys !== 'contacts' || f.type === 'checkbox') return;
+      var src = a.items.map(function (j) { return j.kind === 'field' ? M.fields[j.id] : null; }).filter(function (g) { return g && g.hook && g.hook.sys === 'contacts' && g.hook.attr === f.hook.attr; })[0];
+      if (!src) return;
+      var el = sa.querySelector('.fld[data-fid="' + src.id + '"]'); if (!el) return;
+      setVal(sb, f, readField(el, src));
+    });
+  }
+  function sectionEl(s, firstParty) {
+    var sec = h('section', { class: 'sec' + (s.kind === 'staff' ? ' staffsec' : ''), id: 'sec_' + s.id });
+    var meta = [];
+    if (s.kind === 'party') meta.push('one contact record');
+    if (s.kind === 'checklist') meta.push('checklist items become uploads');
+    if (s.kind === 'staff') meta.push('staff side; not shown to applicants');
+    if (s.required) meta.push('marked required on the PDF');
+    if (s.repeat) meta.push('one block per ' + s.repeat.name.toLowerCase().replace(/^proposed /, '') + '; the PDF prints ' + s.repeat.count);
+    meta.push('PDF page ' + (s.repeat ? s.repeat.pages.join(', ') : s.page));
+    if (s.kind === 'info') {
+      sec.appendChild(h('details', null, [h('summary', null, [h('b', { text: s.title }), h('span', { class: 'meta', text: '  help text carried over from page ' + s.page })])].concat(s.items.map(function (it) { return h('p', { class: 'note', text: it.text, style: 'margin-top:8px' }); }))));
+      return sec;
+    }
+    sec.appendChild(h('header', null, [h('h2', { text: s.title }), h('span', { class: 'meta', text: meta.join(' · ') })]));
+    if (s.kind === 'party') sec.appendChild(partyBar(s, firstParty));
+    if (s.repeat) {
+      var list = h('div', { class: 'formcol' }), n = 0;
+      var renum = function () { $$('.inst h3', list).forEach(function (x, i) { x.textContent = s.repeat.name + ' ' + (i + 1); }); recalc(); };
+      var addInst = function () {
+        var sfx = '_i' + (uid++), inst = h('div', { class: 'inst' });
+        inst.appendChild(h('header', null, [h('h3', { text: s.repeat.name }), h('button', { class: 'btn ghost small', type: 'button', text: 'Remove', onclick: function () { inst.remove(); renum(); } })]));
+        inst.appendChild(gridEl(s, sfx)); list.appendChild(inst); n++; renum();
+      };
+      sec.appendChild(list);
+      sec.appendChild(h('div', { class: 'submit' }, [h('button', { class: 'btn ghost small', type: 'button', text: 'Add another ' + s.repeat.name.toLowerCase().replace(/^proposed /, ''), onclick: addInst })]));
+      sec._add = addInst;
+      addInst();
+    } else sec.appendChild(gridEl(s, ''));
+    return sec;
+  }
+  function renderForm() {
+    var root = $('#form'); root.textContent = '';
+    if (M.mode === 'layout') root.appendChild(h('div', { class: 'notice', text: 'This PDF has no fillable fields. Every field below was inferred from underscores, ruled lines, colons and checkbox marks, so expect to correct more of them in the Field map.' }));
+    var firstParty = M.sections.filter(function (s) { return s.kind === 'party'; })[0], hidden = 0, hiddenNames = [];
+    M.sections.forEach(function (s) {
+      var staffN = s.items.filter(function (it) { return it.kind === 'field' && M.fields[it.id].staff && !M.fields[it.id].off; }).length;
+      if (!ui.staff) { hidden += staffN; s.items.forEach(function (it) { var f = it.kind === 'field' && M.fields[it.id]; if (f && f.staff && !f.off && hiddenNames.indexOf(f.label) < 0) hiddenNames.push(f.label); }); if (s.kind === 'staff') return; }
+      root.appendChild(sectionEl(s, firstParty));
+    });
+    if (!ui.staff && hidden) root.appendChild(h('div', { class: 'notice calm' }, [plural(hidden, 'office-use field') + ' from the PDF (' + hiddenNames.slice(0, 6).join(', ') + ') ' + (hidden === 1 ? 'is' : 'are') + ' kept on the staff side. ', h('button', { class: 'btn ghost small', type: 'button', text: 'Show staff view', onclick: function () { setStaff(true); } })]));
+    root.appendChild(h('div', { class: 'submit' }, [h('button', { class: 'btn', type: 'button', id: 'check', text: 'Check and preview submission', onclick: preview }), h('span', { class: 'hint', text: 'Shows what each system would receive. Nothing leaves this page.' })]));
+    root.appendChild(h('div', { id: 'preview' }));
+    recalc(); markSel();
+  }
+  function getNum(scope, fid) {
+    var i = scope.querySelector('[data-val="' + fid + '"]'); if (!i || i.value === '') return null;
+    var v = parseFloat(i.value); if (isNaN(v)) return null;
+    var u = scope.querySelector('[data-unit="' + fid + '"]'); if (u && u.value === 'in') v = v / 12;
+    return v;
+  }
+  function recalc() {
+    $$('#form [data-calc]').forEach(function (inp) {
+      var f = M.fields[inp.dataset.calc], c = f.calc; if (!c) return;
+      var scope = c.op === 'sum' ? inp.closest('table') : (inp.closest('.inst') || inp.closest('.sec')), v = null;
+      if (c.op === 'mul') { var a = c.a.f ? getNum(scope, c.a.f) : c.a.k, b = c.b.f ? getNum(scope, c.b.f) : c.b.k; if (a != null && b != null) v = a * b; }
+      else { var t = 0, any = false; $$('[data-val="' + c.col + '"]', scope).forEach(function (i) { var x = parseFloat(i.value); if (!isNaN(x)) { t += x; any = true; } }); if (any) v = t; }
+      if (!c.firm && inp.dataset.touched) return;
+      inp.value = v == null ? '' : String(Math.round(v * 100) / 100);
+    });
+    $$('#form [data-count]').forEach(function (inp) { if (!inp.dataset.touched) inp.value = String($$('#sec_' + inp.dataset.count + ' .inst').length); });
+  }
+  function readField(el, f) {
+    var q = function (s) { return el.querySelector(s); };
+    if (f.type === 'csz') return { city: q('[data-part="city"]').value, state: q('[data-part="state"]').value, zip: q('[data-part="zip"]').value };
+    if (f.type === 'choice') return $$('.opts input:checked', el).map(function (i) { return i.value; });
+    if (f.type === 'radio') { var r = q('.opts input:checked'); return r ? r.value : ''; }
+    if (f.type === 'checkbox' || f.type === 'ack') return q('input[type="checkbox"]').checked;
+    if (f.type === 'attachment') return { files: Array.prototype.map.call(q('input[type="file"]').files || [], function (x) { return x.name; }) };
+    var i = q('[data-val]'); if (!i) return '';
+    var u = q('[data-unit]'); return u && i.value !== '' ? i.value + ' ' + u.value : i.value;
+  }
+  function stamp() { var d = new Date(), z = function (n) { return ('0' + n).slice(-2); }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()); }
+  function empty(v) { return v === '' || v === false || v == null || (Array.isArray(v) && !v.length) || (v && v.files && !v.files.length) || (v && v.city !== undefined && !v.city && !v.zip); }
+  function preview() {
+    $$('#form .err').forEach(function (e) { e.remove(); }); $$('#form [aria-invalid]').forEach(function (e) { e.removeAttribute('aria-invalid'); });
+    var out = { contacts: [], property: {}, licenses: [], esign: [], documents: [], permit: {}, payments: {}, application: {} }, errs = [];
+    var bad = function (el, f, msg) { errs.push({ f: f, el: el, msg: msg }); var i = el.querySelector('[data-val], [data-part], input'); if (i) i.setAttribute('aria-invalid', 'true'); el.appendChild(h('div', { class: 'err', text: msg })); };
+    M.sections.forEach(function (s) {
+      if (s.kind === 'info') return; var secEl = $('#sec_' + s.id); if (!secEl) return;
+      var scopes = s.repeat ? $$('.inst', secEl) : [secEl], rows = [], contact = null;
+      scopes.forEach(function (scope) {
+        var rec = {};
+        $$('.fld[data-fid]', scope).forEach(function (el) {
+          var f = M.fields[el.dataset.fid]; if (!f || el.closest('table')) return;
+          var v = readField(el, f), k = f.key.split('.').pop();
+          rec[k] = v;
+          if (!f.staff) {
+            if (f.required && empty(v)) bad(el, f, f.label + ' is required on the PDF. Enter it to continue.');
+            else if (f.type === 'email' && v && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) bad(el, f, 'Enter an email address like name@example.com.');
+            else if ((f.type === 'phone' || f.type === 'fax') && v && v.replace(/\D/g, '').length < 10) bad(el, f, 'Enter all 10 digits, area code first.');
+            else if (f.max != null && parseFloat(v) > f.max) bad(el, f, 'The PDF caps this at ' + f.max + (f.unit ? ' ' + f.unit : '') + '.');
+          }
+          if (!f.hook || empty(v)) return;
+          var hk = f.hook;
+          if (hk.sys === 'contacts') { contact = contact || { role: s.title }; contact[hk.attr] = v; }
+          else if (hk.sys === 'property') out.property[hk.attr] = v;
+          else if (hk.sys === 'licenses') out.licenses.push({ holder: s.title, number: v });
+          else if (hk.sys === 'esign') out.esign.push({ signs_as: s.title, typed_name: v, signed_at: stamp() });
+          else if (hk.sys === 'documents') out.documents.push({ item: f.label, files: v.files });
+          else out[hk.sys][hk.attr] = v;
+        });
+        $$('table.tbl', scope).forEach(function (tb) {
+          var list = [];
+          $$('tbody tr', tb).forEach(function (tr) { var r = {}, any = false; $$('[data-val]', tr).forEach(function (i) { r[M.fields[i.dataset.val].key.split('.').pop()] = i.value; if (i.value) any = true; }); if (any) list.push(r); });
+          rec.rows = list; $$('tfoot [data-val]', tb).forEach(function (i) { rec[M.fields[i.dataset.val].key.split('.').pop()] = i.value; });
+        });
+        rows.push(rec);
+      });
+      if (contact) out.contacts.push(contact);
+      if (s.kind !== 'staff') out.application[s.slug] = s.repeat ? rows : rows[0];
+    });
+    var pv = $('#preview'); pv.textContent = '';
+    var sec = h('section', { class: 'sec' }, [h('header', null, [h('h2', { text: 'Submission preview' }), h('span', { class: 'meta', text: 'simulation; nothing is sent' })])]);
+    if (errs.length) {
+      sec.appendChild(h('div', { class: 'notice' }, [h('b', { text: plural(errs.length, 'thing') + ' to fix first. ' })].concat(errs.slice(0, 8).map(function (e) { return h('button', { class: 'btn ghost small', type: 'button', style: 'margin:2px 4px 2px 0', text: e.f.label, onclick: function () { e.el.scrollIntoView({ block: 'center' }); var i = e.el.querySelector('input,select,textarea'); if (i) i.focus(); } }); }))));
+    } else sec.appendChild(h('div', { class: 'notice calm', text: 'No required field is empty and every entry passes its format check.' }));
+    var cards = h('div', { class: 'pay' });
+    var card = function (k, data) {
+      var isEmpty = Array.isArray(data) ? !data.length : !Object.keys(data).length;
+      cards.appendChild(h('article', null, [h('h3', { text: SYS[k].name }), h('p', { text: SYS[k].does }), h('pre', { text: isEmpty ? (k === 'permit' || k === 'payments' ? '(filled on the staff side)' : '(nothing entered yet)') : JSON.stringify(data, null, 2) })]));
+    };
+    ['contacts', 'property', 'licenses', 'esign', 'documents', 'permit', 'payments'].forEach(function (k) { if (live().some(function (f) { return f.hook && f.hook.sys === k; })) card(k, out[k]); });
+    sec.appendChild(cards);
+    sec.appendChild(h('article', null, [h('h3', { class: 'cap', text: 'Application record (everything the PDF asked for)', style: 'margin:4px 0 6px' }), h('pre', { text: JSON.stringify(out.application, null, 2) })]));
+    pv.appendChild(sec); sec.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+  function fillExample() {
+    var today = new Date(), iso = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+    var parties = M.sections.filter(function (s) { return s.kind === 'party'; });
+    $$('#form .fld[data-fid]').forEach(function (el) {
+      var f = M.fields[el.dataset.fid]; if (!f || f.staff) return;
+      var i = el.querySelector('[data-val]'), t = f.type;
+      if (el.closest('table')) { var tr = el.closest('tr'), n = $$('tbody tr', el.closest('table')).indexOf(tr); if (i && !i.readOnly && n >= 0 && n < 2) i.value = /number/.test(i.type) ? String(12 + n * 6) : (/unit/i.test(f.label) ? 'Suite ' + (101 + n) : ['Example Cafe', 'Sample Books'][n]); return; }
+      if (t === 'csz') { el.querySelector('[data-part="city"]').value = 'Beaverton'; el.querySelector('[data-part="state"]').value = 'OR'; el.querySelector('[data-part="zip"]').value = '97005'; return; }
+      if (t === 'choice' || t === 'radio') { var o = el.querySelector('.opts input'); if (o) o.checked = true; return; }
+      if (t === 'checkbox' || t === 'ack') { if (!/primary contact/i.test(f.label) || secBy[f.sec] === parties[0]) el.querySelector('input[type="checkbox"]').checked = true; return; }
+      if (t === 'attachment' || !i || i.readOnly || i.dataset.count) return;
+      if (f.calc && !f.calc.firm) { delete i.dataset.touched; return; }
+      var v = { email: 'jordan@example.com', phone: '(503) 555-0100', fax: '(503) 555-0101', date: iso, person: 'Jordan Example', company: 'Example Sign Co.', address: '100 Example St', site_address: '4500 SW Example Blvd', city: 'Beaverton', state: 'OR', zip: '97005', license: 'EXAMPLE-0000', taxlot: 'EXAMPLE TAX LOT', zone: 'EXAMPLE ZONE', signature: 'Jordan Example', integer: '2', dimension: '4', area: '32', percent: '25', number: '10', currency: '0', textarea: 'Example description.', text: /wordage/i.test(f.label) ? 'EXAMPLE CAFE' : 'Example' }[t];
+      if (t === 'dimension' && /length|width/i.test(f.label)) v = '8';
+      if (f.max != null && parseFloat(v) > f.max) v = String(f.max);
+      if (i.tagName === 'SELECT') { if (i.options.length > 1) i.selectedIndex = 1; } else if (v != null) i.value = v;
+    });
+    recalc();
+    var note = $('#exnote'); if (note) note.hidden = false;
+  }
+
+  /* ---------------- selection + source pane ---------------- */
+  function markSel() {
+    $$('.fld.sel').forEach(function (e) { e.classList.remove('sel'); });
+    if (ui.sel) $$('.fld[data-fid="' + ui.sel + '"]').forEach(function (e) { e.classList.add('sel'); });
+    $$('.map tr.cur').forEach(function (e) { e.classList.remove('cur'); });
+    var r = ui.sel && $('.map tr[data-fid="' + ui.sel + '"]'); if (r) r.classList.add('cur');
+  }
+  function select(fid, scroll) {
+    var f = M.fields[fid]; if (!f) return;
+    ui.sel = fid;
+    if (!f.sources.some(function (x) { return x.page === ui.page; })) ui.page = (f.sources[0] || {}).page || ui.page;
+    if (scroll) {
+      if (ui.view !== 'form') setView('form');
+      if (f.staff && !ui.staff) setStaff(true);
+      var el = $('.fld[data-fid="' + fid + '"]'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+    markSel(); renderPane();
+  }
+  async function pageCanvas(p) {
+    if (canv[p]) return canv[p];
+    var page = await doc.getPage(p), vp = page.getViewport({ scale: 1.15 * Math.min(2, window.devicePixelRatio || 1) });
+    var c = document.createElement('canvas'); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+    await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+    c.setAttribute('role', 'img'); c.setAttribute('aria-label', 'Page ' + p + ' of the source PDF');
+    canv[p] = c; return c;
+  }
+  function renderPane() {
+    var pane = $('#pane'); if (!pane || !M) return; var keep = pane.scrollTop; pane.textContent = '';
+    var p = ui.page, sz = M.pageSizes[p - 1];
+    var go = function (d) { return function () { ui.page = Math.min(M.pages, Math.max(1, ui.page + d)); renderPane(); }; };
+    var f = ui.sel && M.fields[ui.sel];
+    var how;
+    if (!f) how = h('div', { class: 'how' }, [h('h3', { text: 'How each field was read' }), h('p', { text: 'Click a field in the form or a box on the page. This panel then shows which PDF field it came from, where its label was found, and why it became the input type it did.' })]);
+    else {
+    var names = f.sources.map(function (x) { return x.name; }).filter(Boolean), uniq = names.filter(function (x, i) { return names.indexOf(x) === i; });
+    var rows = [h('h3', { text: f.label }),
+      h('dt', { text: 'Reads as' }), h('dd', { text: TYPES[f.type] + (f.unit ? ' (' + f.unit + ')' : '') + (f.options ? ': ' + f.options.map(function (o) { return o.label; }).join(', ') : '') }),
+      h('dt', { text: 'Why that type' }), h('dd', { text: f.whyType || '' }),
+      h('dt', { text: 'Label from' }), h('dd', { text: (f.why || 'not found') + (f.rawLabel ? ' — "' + f.rawLabel.slice(0, 90) + (f.rawLabel.length > 90 ? '…' : '') + '"' : '') }),
+      h('dt', { text: 'Linked to' }), h('dd', { text: f.hook ? SYS[f.hook.sys].name + ' · ' + f.hook.attr : 'Nothing; stored with the application' }),
+      h('dt', { text: 'PDF field' }), h('dd', { class: 'mono', text: (uniq.length ? uniq.slice(0, 4).join(', ') + (uniq.length > 4 ? ' and ' + (uniq.length - 4) + ' more' : '') : 'inferred from layout') + ' · ' + plural(f.sources.length, 'box') })];
+    if (f.calc || f.whyCalc) rows.push(h('dt', { text: 'Calculation' }), h('dd', { text: (f.calc ? f.calc.text + '; ' : '') + (f.whyCalc || '') }));
+    if (f.required) rows.push(h('dt', { text: 'Required' }), h('dd', { text: f.whyReq || 'set in the Field map' }));
+    f.flags.forEach(function (g) { rows.push(h('dt', { class: 'flag', text: 'Review' }), h('dd', { class: 'flag', text: g })); });
+    how = h('dl', { class: 'how' }, rows);
+    }
+    pane.appendChild(how);
+
+    pane.appendChild(h('div', { class: 'pagebar' }, [h('span', { class: 'cap', text: 'Source PDF · page ' + p + ' of ' + M.pages }), h('span', null, [h('button', { class: 'btn ghost small', type: 'button', text: 'Previous', disabled: p <= 1, onclick: go(-1) }), ' ', h('button', { class: 'btn ghost small', type: 'button', text: 'Next', disabled: p >= M.pages, onclick: go(1) })])]));
+    var wrap = h('div', { class: 'sheetwrap' }, [canv[p] || h('div', { class: 'ph', style: 'aspect-ratio:' + sz.w + '/' + sz.h })]);
+    var n = 0;
+    live().forEach(function (f) {
+      f.sources.forEach(function (x) {
+        if (x.page !== p) return; n++;
+        wrap.appendChild(h('button', { class: 'box' + (f.hook ? ' l' : '') + (f.flags.length ? ' r' : '') + (f.staff ? ' st' : '') + (f.id === ui.sel ? ' sel' : ''), type: 'button', title: f.label + (x.option ? ': ' + x.option : '') + (x.name ? '  [' + x.name + ']' : ''), 'aria-label': f.label, style: 'left:' + (x.x1 / sz.w * 100) + '%;top:' + ((sz.h - x.y2) / sz.h * 100) + '%;width:' + ((x.x2 - x.x1) / sz.w * 100) + '%;height:' + ((x.y2 - x.y1) / sz.h * 100) + '%', onclick: function () { select(f.id, true); } }));
+      });
+    });
+    pane.appendChild(wrap);
+    if (!canv[p] && doc) pageCanvas(p).then(function () { if (ui.page === p) renderPane(); }).catch(function () {});
+    pane.appendChild(h('div', { class: 'legend' }, [h('span', null, [h('i', { class: 'sw' }), 'field']), h('span', null, [h('i', { class: 'sw l' }), 'system-linked']), h('span', null, [h('i', { class: 'sw r' }), 'to review']), h('span', null, [h('i', { class: 'sw st' }), 'staff side']), h('span', { text: n ? plural(n, 'box') + ' on this page' : 'No fields on this page' })]));
+    pane.scrollTop = keep;
+    var sb = pane.querySelector('.box.sel');
+    if (sb && pane.scrollHeight > pane.clientHeight + 4) { var top = sb.offsetTop + sb.offsetParent.offsetTop; if (top < pane.scrollTop + 20 || top > pane.scrollTop + pane.clientHeight - 60) pane.scrollTop = Math.max(0, top - pane.clientHeight / 2); }
+  }
+
+  /* ---------------- field map ---------------- */
+  function rerender() { renderTB(); renderForm(); renderSchema(); renderPane(); }
+  function renderMap() {
+    var v = $('#v-map'); v.textContent = '';
+    var all = fields(), counts = { all: all.length, review: all.filter(function (f) { return f.flags.length; }).length, linked: all.filter(function (f) { return f.hook; }).length, staff: all.filter(function (f) { return f.staff; }).length };
+    var seg = h('div', { class: 'seg small', role: 'group', 'aria-label': 'Filter fields' }, [['all', 'All'], ['review', 'To review'], ['linked', 'System-linked'], ['staff', 'Staff side']].map(function (o) {
+      return h('button', { type: 'button', 'aria-pressed': String(ui.filter === o[0]), text: o[1] + ' ' + counts[o[0]], onclick: function () { ui.filter = o[0]; renderMap(); } });
+    }));
+    v.appendChild(h('div', { class: 'bar', style: 'margin-bottom:10px' }, [seg, h('span', { class: 'hint', text: 'Edit a label, change what a field reads as, or relink it. The form and schema follow.' })]));
+    var tb = h('tbody');
+    M.sections.forEach(function (s) {
+      if (s.kind === 'info') return;
+      var list = all.filter(function (f) { return f.sec === s.id && (ui.filter === 'all' || (ui.filter === 'review' && f.flags.length) || (ui.filter === 'linked' && f.hook) || (ui.filter === 'staff' && f.staff)); });
+      if (!list.length) return;
+      tb.appendChild(h('tr', { class: 'sech' }, [h('td', { colspan: 7, text: s.title + (s.repeat ? '  (repeats; ' + s.repeat.count + ' on the PDF)' : '') })]));
+      list.forEach(function (f) {
+        var lab = h('input', { type: 'text', value: f.label, 'aria-label': 'Label', id: 'm_l_' + f.id });
+        lab.addEventListener('change', function () { f.label = lab.value.trim() || f.label; f.flags = f.flags.filter(function (g) { return !/name this field|PDF field name/.test(g); }); rerender(); });
+        var typ = h('select', { 'aria-label': 'Reads as', id: 'm_t_' + f.id }, Object.keys(TYPES).map(function (k) { return h('option', { value: k, text: TYPES[k], selected: k === f.type }); }));
+        typ.addEventListener('change', function () {
+          f.type = typ.value; f.whyType = 'set by hand in the Field map';
+          if (/^(select|radio|choice)$/.test(f.type) && !(f.options && f.options.length)) f.options = [{ label: 'Yes' }, { label: 'No' }];
+          if (!/^(area|dimension|number|integer|percent|currency)$/.test(f.type)) { delete f.calc; }
+          FR.rehook(f, s.kind); f.flags = f.flags.filter(function (g) { return !/Unit is not printed|Printed as checkboxes|Suggested calculation/.test(g); }); renderMap(); rerender();
+        });
+        var cur = f.hook ? f.hook.sys + '|' + f.hook.attr : '';
+        var hk = h('select', { 'aria-label': 'Linked to', id: 'm_h_' + f.id }, [h('option', { value: '', text: 'Not linked' })].concat(HOOKS.map(function (k) { var p = k.split('|'); return h('option', { value: k, text: SYS[p[0]].tag + ' · ' + p[1], selected: k === cur }); })));
+        hk.addEventListener('change', function () { var p = hk.value.split('|'); f.hook = hk.value ? { sys: p[0], attr: p[1] } : null; rerender(); });
+        var rq = h('input', { type: 'checkbox', checked: !!f.required, 'aria-label': 'Required', id: 'm_r_' + f.id });
+        rq.addEventListener('change', function () { f.required = rq.checked; f.whyReq = 'set by hand in the Field map'; rerender(); });
+        var on = h('input', { type: 'checkbox', checked: !f.off, 'aria-label': 'Keep this field', id: 'm_o_' + f.id });
+        on.addEventListener('change', function () { f.off = !on.checked; renderMap(); rerender(); });
+        var names = f.sources.map(function (x) { return x.name; }).filter(Boolean);
+        tb.appendChild(h('tr', { class: (f.off ? 'off' : '') + (f.id === ui.sel ? ' cur' : ''), data: { fid: f.id } }, [
+          h('td', null, [on]), h('td', { style: 'min-width:220px' }, [lab]), h('td', null, [typ]), h('td', null, [hk]), h('td', null, [rq]),
+          h('td', { class: 'mono' }, [h('button', { class: 'pin', type: 'button', text: 'p' + f.page + ' · ' + (names[0] || 'layout') + (f.sources.length > 1 ? ' +' + (f.sources.length - 1) : ''), title: 'Show in the form and on the PDF', onclick: function () { select(f.id, true); } })]),
+          h('td', { class: 'why' }, [(f.why || 'no label found') + '; ' + (f.whyType || '')].concat(f.flags.map(function (g) { return h('span', { class: 'flag', text: g }); })))
+        ]));
+      });
+    });
+    v.appendChild(h('div', { class: 'mapwrap' }, [h('table', { class: 'map' }, [h('thead', null, [h('tr', null, ['Keep', 'Web label', 'Reads as', 'Linked to', 'Req.', 'PDF source', 'How it was read'].map(function (t) { return h('th', { text: t }); }))]), tb])]));
+  }
+
+  /* ---------------- schema ---------------- */
+  function fieldDef(f) {
+    var names = f.sources.map(function (x) { return x.name; }).filter(Boolean), d = { key: f.key, label: f.label, type: f.type };
+    if (f.required) d.required = true; if (f.unit) d.unit = f.unit; if (f.options) d.options = f.options.map(function (o) { return o.label; });
+    if (f.max != null) d.max = f.max; if (f.hint) d.help = f.hint; if (f.calc) d.calculated = (f.calc.firm ? '' : 'suggested: ') + f.calc.text;
+    if (f.staff) d.audience = 'staff';
+    if (f.hook) d.integration = { system: f.hook.sys, attribute: f.hook.attr };
+    if (f.children && f.children.length) d.items = f.children.map(function (c) { return M.fields[c]; }).filter(function (c) { return !c.off; }).map(fieldDef);
+    d.pdf = { page: f.page, fields: names.length > 3 ? names.slice(0, 3).concat(['+' + (names.length - 3) + ' more']) : names };
+    return d;
+  }
+  function schema() {
+    return {
+      form: M.title, source: { file: M.fileName, pages: M.pages, pdf_fields: M.stats.pdfFields, read_from: M.mode === 'layout' ? 'page layout' : 'fillable fields' },
+      sections: M.sections.filter(function (s) { return s.kind !== 'info'; }).map(function (s) {
+        var o = { key: s.slug, title: s.title, kind: s.kind === 'party' ? 'contact' : s.kind };
+        if (s.repeat) o.repeats = { blocks_on_pdf: s.repeat.count, counted_by: s.repeat.countField ? M.fields[s.repeat.countField].key : undefined };
+        o.fields = [];
+        s.items.forEach(function (it) {
+          if (it.kind === 'field') { var f = M.fields[it.id]; if (!f.off && !f.parent) o.fields.push(fieldDef(f)); }
+          else if (it.kind === 'table') o.fields.push({ key: s.slug + '.rows', type: 'table', rows_on_pdf: it.rows, columns: it.cols.map(function (c) { return M.fields[c]; }).filter(function (f) { return !f.off; }).map(fieldDef) });
+        });
+        return o;
+      })
+    };
+  }
+  function renderSchema() {
+    var v = $('#v-schema'); v.textContent = '';
+    var js = JSON.stringify(schema(), null, 2), pre = h('pre', { text: js, style: 'max-height:640px', tabindex: 0 });
+    var by = {}; live().forEach(function (f) { if (f.hook) (by[f.hook.sys] = by[f.hook.sys] || []).push(f); });
+    var cards = h('div', { class: 'pay' }, Object.keys(SYS).filter(function (k) { return by[k]; }).map(function (k) {
+      var attrs = {}; by[k].forEach(function (f) { attrs[f.hook.attr] = (attrs[f.hook.attr] || 0) + 1; });
+      return h('article', null, [h('h3', { text: SYS[k].name }), h('p', { text: SYS[k].does }), h('div', { class: 'tags' }, Object.keys(attrs).map(function (a) { return h('span', { class: 'tag link', text: a + (attrs[a] > 1 ? ' ×' + attrs[a] : '') }); }))]);
+    }));
+    var btn = h('button', { class: 'btn ghost small', type: 'button', text: 'Copy schema' });
+    btn.addEventListener('click', function () {
+      var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy schema'; }, 1600); };
+      var fall = function () { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected; press copy'; };
+      try { navigator.clipboard.writeText(js).then(done, fall); } catch (e) { fall(); }
+    });
+    v.appendChild(h('div', { class: 'schema' }, [
+      h('section', { class: 'sec' }, [h('header', null, [h('h2', { text: 'Where the linked fields go' }), h('span', { class: 'meta', text: 'system names are placeholders for whatever the city runs' })]), cards]),
+      h('section', { class: 'sec' }, [h('header', null, [h('h2', { text: 'Form definition' }), btn]), h('p', { class: 'note', text: 'One entry per web field, with its type, its link and the PDF field it came from. A form builder or intake API can be fed from this.' }), pre])
+    ]));
+  }
+
+  /* ---------------- shell ---------------- */
+  function setView(v) { ui.view = v; ['form', 'map', 'schema'].forEach(function (k) { $('#v-' + k).hidden = k !== v; $('#t-' + k).setAttribute('aria-pressed', String(k === v)); }); $('#formtools').hidden = v !== 'form'; if (v === 'map') renderMap(); }
+  function setStaff(on) { ui.staff = on; $('#a-app').setAttribute('aria-pressed', String(!on)); $('#a-staff').setAttribute('aria-pressed', String(on)); renderForm(); }
+  function status(title, msg, keep) {
+    var s = $('#status'); s.hidden = !title; s.textContent = '';
+    if (title) { s.appendChild(h('b', { text: title })); if (msg) s.appendChild(document.createTextNode(msg)); }
+    if (!keep) { $('#bar').hidden = true; $('#views').hidden = true; $('#tb').textContent = ''; }
+  }
+  async function load(buf, name, sample) {
+    status('Reading ' + name, 'Finding the fields and the text around them.');
+    try {
+      doc = await lib.getDocument({ data: new Uint8Array(buf), isEvalSupported: false }).promise;
+      M = await FR.analyze(doc, lib, name);
+    } catch (e) {
+      status('That file could not be read', /password/i.test(String(e && e.message)) ? 'It is password-protected. Remove the password and open it again.' : 'It may not be a PDF, or it may be damaged. Try saving a fresh copy and opening that.'); return;
+    }
+    if (!M.order.length) { status(M.noText ? 'This PDF is a scan' : 'No fields found', M.noText ? 'It has no text layer, so there is nothing to read. Run it through OCR first, then open the result here.' : 'Nothing on these pages looks like a blank to fill in. If this is a brochure or fee schedule there is no form to carry over.'); return; }
+    secBy = {}; M.sections.forEach(function (s) { secBy[s.id] = s; });
+    canv = {}; ui.sel = null; ui.page = (M.fields[M.order[0]] || {}).page || 1; ui.sample = !!sample; ui.staff = false; ui.filter = 'all';
+    $('#status').hidden = true; $('#bar').hidden = false; $('#views').hidden = false; $('#exnote').hidden = true;
+    $('#a-app').setAttribute('aria-pressed', 'true'); $('#a-staff').setAttribute('aria-pressed', 'false');
+    setView('form'); rerender();
+  }
+  function readFile(file) {
+    if (!file) return;
+    if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') { status('That is not a PDF', 'Open the application as a .pdf file.'); return; }
+    var r = new FileReader(); r.onload = function () { load(r.result, file.name, false); }; r.onerror = function () { status('That file could not be read', 'Try opening it again.'); }; r.readAsArrayBuffer(file);
+  }
+  function start() {
+    $('#pick').addEventListener('click', function () { $('#file').click(); });
+    $('#file').addEventListener('change', function (e) { readFile(e.target.files[0]); e.target.value = ''; });
+    ['form', 'map', 'schema'].forEach(function (k) { $('#t-' + k).addEventListener('click', function () { setView(k); }); });
+    $('#a-app').addEventListener('click', function () { setStaff(false); }); $('#a-staff').addEventListener('click', function () { setStaff(true); });
+    $('#hl').addEventListener('change', function (e) { ui.hl = e.target.checked; document.body.classList.toggle('hl', ui.hl); });
+    $('#fill').addEventListener('click', fillExample);
+    document.body.classList.add('hl');
+    var form = $('#form');
+    form.addEventListener('focusin', function (e) { var el = e.target.closest('.fld[data-fid]'); if (el && el.dataset.fid !== ui.sel) select(el.dataset.fid, false); });
+    form.addEventListener('input', function (e) {
+      var t = e.target;
+      if (t.dataset.mask === 'phone') { var d = t.value.replace(/\D/g, '').slice(0, 10); t.value = d.length > 6 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : d.length > 3 ? '(' + d.slice(0, 3) + ') ' + d.slice(3) : d; }
+      if (t.dataset.calc || t.dataset.count) { if (t.value === '') delete t.dataset.touched; else t.dataset.touched = '1'; }
+      recalc();
+    });
+    form.addEventListener('change', function (e) {
+      var t = e.target; if (t.type !== 'checkbox' || !t.checked) return;
+      var el = t.closest('.fld[data-fid]'), f = el && M.fields[el.dataset.fid];
+      if (f && f.hook && f.hook.attr === 'Primary contact flag') $$('#form .fld[data-fid]').forEach(function (o) { var g = M.fields[o.dataset.fid]; if (o !== el && g && g.hook && g.hook.attr === 'Primary contact flag') { var c = o.querySelector('input[type="checkbox"]'); if (c) c.checked = false; } });
+    });
+    var depth = 0, drop = $('#drop');
+    window.addEventListener('dragenter', function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') >= 0) { depth++; drop.hidden = false; e.preventDefault(); } });
+    window.addEventListener('dragover', function (e) { e.preventDefault(); });
+    window.addEventListener('dragleave', function () { depth = Math.max(0, depth - 1); if (!depth) drop.hidden = true; });
+    window.addEventListener('drop', function (e) { e.preventDefault(); depth = 0; drop.hidden = true; if (e.dataTransfer && e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]); });
+    if (!lib || !FR) { status('The PDF reader did not load', 'This page needs its PDF library from the network. Reload the page; if it still fails, the library is being blocked.'); return; }
+    status('Loading the sample application', 'The Wall / Freestanding Sign Application.');
+    fetch('sign-application.pdf').then(function (r) { if (!r.ok) throw new Error('missing'); return r.arrayBuffer(); }).then(function (buf) { return load(buf, 'Wall-Freestanding-Sign-Application.pdf', true); }).catch(function () { status('Open an application PDF to start', 'Use the button above or drop a file anywhere on the page.'); });
+  }
+  window.__porter = { get model() { return M; }, load: load };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+</script>
+
+</body></html>
