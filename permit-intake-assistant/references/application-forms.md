@@ -44,9 +44,9 @@ district; map & tax lot. (Use these to test the DRCL threshold: addition ≤25% 
 in residential/commercial/MU; ≤15% and <30,000 sq ft industrial — above that it's DR Two/Three, not Type 1.)
 
 **Worksheet flags (each "yes" pulls in standards):** exterior modifications (60.05.15); new rooftop equipment
-(screening, 60.05.15.5); abuts a Major Pedestrian Route (60.05.55 map); loading/solid-waste/mechanical
+(screening, 60.05.15.5); abuts a Major Pedestrian Route (the form cites 60.05.55, which is repealed; don't cite it); loading/solid-waste/mechanical
 (60.05.20.2); parking/walkway changes (60.05.20.3–9); landscape changes (60.05.25 — needs landscape plan);
-retaining wall/fence (60.05.25.9–10); grading (grading plan; 60.15.10 if in/abutting residential); lighting
+retaining wall/fence (60.05.25.8 retaining walls, 60.05.25.9 fences and walls; the form says 9–10); grading (grading plan; 60.15.10 if in/abutting residential); lighting
 (60.05.30 + Table 60.05-1); loading (60.25); parking (60.30); **tree removal — contact staff; if Landscape
 Trees, address 60.60.25.9 in the written statement**.
 
